@@ -7,133 +7,89 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --cream: #FAF3E8;
-    --gold: #C8832A;
-    --gold-light: #F2E0C4;
-    --red: #A33B2A;
-    --green: #4A7C5F;
-    --green-light: #E4F0E8;
-    --amber: #D4870F;
-    --amber-light: #FDF0D5;
-    --red-light: #FAEAE7;
-    --ink: #1C1008;
-    --muted: #7A6652;
-    --card: #FFFFFF;
-    --border: #E8D9C4;
+    --cream:#FAF3E8; --gold:#C8832A; --gold-light:#F2E0C4; --red:#A33B2A;
+    --green:#4A7C5F; --green-light:#E4F0E8; --amber:#D4870F; --amber-light:#FDF0D5;
+    --red-light:#FAEAE7; --ink:#1C1008; --muted:#7A6652; --card:#FFFFFF; --border:#E8D9C4;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--cream); font-family: 'Inter', sans-serif; color: var(--ink); min-height: 100vh; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--cream);font-family:'Inter',sans-serif;color:var(--ink);min-height:100vh;}
 
-  header {
-    background: var(--ink);
-    padding: 18px 32px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  header h1 { font-family: 'Playfair Display', serif; color: var(--gold); font-size: 1.5rem; letter-spacing: 0.01em; }
-  header span { color: var(--muted); font-size: 0.8rem; }
-  #last-updated { color: #9E8B78; font-size: 0.75rem; margin-top: 2px; }
+  header{background:var(--ink);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .hdr-left h1{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.35rem;}
+  .hdr-left #last-updated{color:#9E8B78;font-size:0.72rem;margin-top:3px;}
+  .hdr-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .hdr-right #today-date{color:#9E8B78;font-size:0.75rem;}
+  .btn-sheet{color:rgba(255,255,255,0.85);font-size:0.75rem;font-weight:600;text-decoration:none;
+    border:1px solid rgba(255,255,255,0.3);border-radius:5px;padding:5px 12px;
+    transition:background 0.15s;}
+  .btn-sheet:hover{background:rgba(255,255,255,0.1);}
+  .btn-refresh{background:var(--gold);color:white;border:none;border-radius:5px;
+    padding:6px 14px;font-size:0.75rem;font-weight:600;cursor:pointer;transition:background 0.15s;}
+  .btn-refresh:hover{background:#a8691f;}
+  .btn-refresh:disabled{opacity:0.6;cursor:not-allowed;}
 
-  .container { max-width: 1100px; margin: 0 auto; padding: 28px 20px 48px; }
+  .container{max-width:1100px;margin:0 auto;padding:26px 18px 48px;}
 
-  /* Section titles */
-  .section-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.1rem;
-    color: var(--ink);
-    margin-bottom: 14px;
-    padding-bottom: 6px;
-    border-bottom: 2px solid var(--gold-light);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .section-title .badge {
-    background: var(--gold);
-    color: white;
-    font-family: 'Inter', sans-serif;
-    font-size: 0.7rem;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 20px;
-  }
-  .section { margin-bottom: 36px; }
+  .section-title{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--ink);
+    margin-bottom:13px;padding-bottom:6px;border-bottom:2px solid var(--gold-light);
+    display:flex;align-items:center;gap:8px;}
+  .section-title .badge{background:var(--gold);color:white;font-family:'Inter',sans-serif;
+    font-size:0.68rem;font-weight:600;padding:2px 8px;border-radius:20px;}
+  .section{margin-bottom:34px;}
 
-  /* Loading / error */
-  .loading { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 0.95rem; }
-  .loading .spinner { width: 36px; height: 36px; border: 3px solid var(--gold-light); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .error-msg { background: var(--red-light); border-left: 4px solid var(--red); padding: 12px 16px; border-radius: 6px; color: var(--red); font-size: 0.85rem; margin-bottom: 20px; }
-  .empty { color: var(--muted); font-size: 0.85rem; font-style: italic; padding: 12px 0; }
+  .loading{text-align:center;padding:60px 20px;color:var(--muted);font-size:0.9rem;}
+  .spinner{width:34px;height:34px;border:3px solid var(--gold-light);border-top-color:var(--gold);
+    border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 14px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .error-msg{background:var(--red-light);border-left:4px solid var(--red);padding:12px 16px;
+    border-radius:6px;color:var(--red);font-size:0.82rem;margin-bottom:18px;}
+  .empty{color:var(--muted);font-size:0.82rem;font-style:italic;padding:10px 0;}
 
-  /* Cards row */
-  .cards-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 36px; }
-  .kpi-card {
-    background: var(--card);
-    border-radius: 10px;
-    padding: 18px 16px;
-    border-left: 4px solid var(--gold);
-    box-shadow: 0 1px 4px rgba(28,16,8,0.07);
-  }
-  .kpi-card .kpi-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 6px; }
-  .kpi-card .kpi-value { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--ink); line-height: 1; }
-  .kpi-card .kpi-sub { font-size: 0.72rem; color: var(--muted); margin-top: 4px; }
+  .cards-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px;margin-bottom:32px;}
+  .kpi-card{background:var(--card);border-radius:10px;padding:16px 15px;
+    border-left:4px solid var(--gold);box-shadow:0 1px 4px rgba(28,16,8,0.07);}
+  .kpi-label{font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:5px;}
+  .kpi-value{font-family:'Playfair Display',serif;font-size:1.75rem;color:var(--ink);line-height:1;}
+  .kpi-sub{font-size:0.68rem;color:var(--muted);margin-top:3px;}
 
-  /* Table */
-  .table-wrap { overflow-x: auto; border-radius: 10px; box-shadow: 0 1px 4px rgba(28,16,8,0.07); }
-  table { width: 100%; border-collapse: collapse; background: var(--card); font-size: 0.83rem; }
-  thead tr { background: var(--ink); }
-  thead th { color: var(--gold-light); font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 10px 14px; text-align: left; white-space: nowrap; }
-  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
-  tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: #FDF8F2; }
-  tbody td { padding: 10px 14px; vertical-align: middle; }
+  .table-wrap{overflow-x:auto;border-radius:10px;box-shadow:0 1px 4px rgba(28,16,8,0.07);}
+  table{width:100%;border-collapse:collapse;background:var(--card);font-size:0.81rem;}
+  thead tr{background:var(--ink);}
+  thead th{color:var(--gold-light);font-weight:600;font-size:0.68rem;text-transform:uppercase;
+    letter-spacing:0.05em;padding:9px 13px;text-align:left;white-space:nowrap;}
+  tbody tr{border-bottom:1px solid var(--border);}
+  tbody tr:last-child{border-bottom:none;}
+  tbody tr:hover{background:#FDF8F2;}
+  tbody td{padding:9px 13px;vertical-align:middle;}
 
-  /* Status pills */
-  .pill {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    white-space: nowrap;
-  }
-  .pill-green { background: var(--green-light); color: var(--green); }
-  .pill-amber { background: var(--amber-light); color: var(--amber); }
-  .pill-red { background: var(--red-light); color: var(--red); }
+  .pill{display:inline-block;padding:3px 9px;border-radius:20px;font-size:0.67rem;font-weight:600;white-space:nowrap;}
+  .pill-green{background:var(--green-light);color:var(--green);}
+  .pill-amber{background:var(--amber-light);color:var(--amber);}
+  .pill-red{background:var(--red-light);color:var(--red);}
 
-  /* WA button */
-  .wa-btn {
-    display: inline-block;
-    background: #25D366;
-    color: white;
-    font-size: 0.7rem;
-    font-weight: 600;
-    padding: 4px 10px;
-    border-radius: 5px;
-    text-decoration: none;
-    white-space: nowrap;
-  }
-  .wa-btn:hover { background: #1da851; }
+  .wa-btn{display:inline-block;background:#25D366;color:white;font-size:0.67rem;font-weight:600;
+    padding:3px 9px;border-radius:5px;text-decoration:none;white-space:nowrap;}
+  .wa-btn:hover{background:#1da851;}
 
-  /* Pending split */
-  .pending-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-  @media (max-width: 700px) { .pending-grid { grid-template-columns: 1fr; } }
-
-  .sub-section-title { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 10px; }
-
-  .overdue-note { font-size: 0.72rem; color: var(--muted); margin-top: 10px; font-style: italic; }
+  .pending-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media(max-width:680px){.pending-grid{grid-template-columns:1fr;}}
+  .sub-title{font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;
+    color:var(--muted);margin-bottom:9px;}
+  .pending-total{text-align:right;margin-top:7px;font-weight:600;color:var(--red);font-size:0.82rem;}
 </style>
 </head>
 <body>
 
 <header>
-  <div>
+  <div class="hdr-left">
     <h1>🫙 Mini's Homely Masalas</h1>
-    <div id="last-updated">Loading data…</div>
+    <div id="last-updated">Loading…</div>
   </div>
-  <span id="today-date"></span>
+  <div class="hdr-right">
+    <span id="today-date"></span>
+    <a class="btn-sheet" href="https://docs.google.com/spreadsheets/d/1bVYNM1QZnivCm-LybdW6ktaH8JDzzYWtz3XaD7Zq7O0/edit" target="_blank">✏️ Edit Sheet</a>
+    <button class="btn-refresh" id="refreshBtn" onclick="init()">⟳ Refresh</button>
+  </div>
 </header>
 
 <div class="container" id="app">
@@ -142,270 +98,236 @@
 
 <script>
 const BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS10Pxvujhj60pRw55jBG9TDmDVzJ2jYF8NpFg0x5zWYteG03IzNQCqnBteN_fB-4r1xeymFNisl7Hu/pub';
-const PROXY = 'https://corsproxy.io/?url=';
-const URLS = {
-  customers: PROXY + encodeURIComponent(BASE + '?gid=0&single=true&output=csv'),
-  products:  PROXY + encodeURIComponent(BASE + '?gid=1428094373&single=true&output=csv'),
-  orders:    PROXY + encodeURIComponent(BASE + '?gid=718714399&single=true&output=csv'),
-  loyal:     PROXY + encodeURIComponent(BASE + '?gid=1826309711&single=true&output=csv'),
+const SHEET_TABS = {
+  customers: BASE + '?gid=0&single=true&output=csv',
+  products:  BASE + '?gid=1428094373&single=true&output=csv',
+  orders:    BASE + '?gid=718714399&single=true&output=csv',
+  loyal:     BASE + '?gid=1826309711&single=true&output=csv',
 };
 
 const today = new Date(); today.setHours(0,0,0,0);
 
-function fmtDate(d) {
-  if (!d || isNaN(d)) return '—';
-  return d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
-}
-function parseDate(s) {
-  if (!s || !s.trim()) return null;
-  // support dd/mm/yyyy and dd-mm-yyyy and yyyy-mm-dd
-  s = s.trim();
+function fmtDate(d){ if(!d||isNaN(d))return'—'; return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}); }
+function parseDate(s){
+  if(!s||!s.trim())return null; s=s.trim();
   let p;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) { p = new Date(s); }
-  else if (/^\d{2}[\/\-]\d{2}[\/\-]\d{4}$/.test(s)) {
-    const [d,m,y] = s.split(/[\/\-]/); p = new Date(`${y}-${m}-${d}`);
-  } else { p = new Date(s); }
-  return isNaN(p) ? null : (p.setHours(0,0,0,0), p);
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)){p=new Date(s);}
+  else if(/^\d{2}[\/\-]\d{2}[\/\-]\d{4}$/.test(s)){const[dd,mm,yy]=s.split(/[\/\-]/);p=new Date(`${yy}-${mm}-${dd}`);}
+  else{p=new Date(s);}
+  return isNaN(p)?null:(p.setHours(0,0,0,0),p);
 }
-function diffDays(a, b) { return Math.round((b - a) / 86400000); }
+function diffDays(a,b){return Math.round((b-a)/86400000);}
 
-async function fetchCSV(url) {
-  const r = await fetch(url);
-  if (!r.ok) throw new Error(`HTTP ${r.status}`);
-  const text = await r.text();
+async function fetchCSV(rawUrl){
+  const url = rawUrl + '&t=' + Date.now(); // cache-bust
+  let text = null;
+
+  // 1st try: corsproxy.io
+  try{
+    const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url));
+    if(r.ok) text = await r.text();
+  }catch(e){}
+
+  // 2nd try: allorigins fallback
+  if(!text){
+    try{
+      const r = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(url));
+      if(r.ok){const j=await r.json(); text=j.contents;}
+    }catch(e){}
+  }
+
+  if(!text) throw new Error('Both proxies failed for: ' + rawUrl);
   return parseCSV(text);
 }
-function parseCSV(text) {
-  const lines = text.trim().split('\n');
-  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g,''));
-  return lines.slice(1).filter(l => l.trim()).map(line => {
-    const vals = [];
-    let cur = '', inQ = false;
-    for (const ch of line) {
-      if (ch === '"') { inQ = !inQ; }
-      else if (ch === ',' && !inQ) { vals.push(cur.trim()); cur = ''; }
-      else cur += ch;
+
+function parseCSV(text){
+  const lines=text.trim().split('\n');
+  const headers=lines[0].split(',').map(h=>h.trim().replace(/^"|"$/g,''));
+  return lines.slice(1).filter(l=>l.trim()).map(line=>{
+    const vals=[]; let cur='',inQ=false;
+    for(const ch of line){
+      if(ch==='"'){inQ=!inQ;}
+      else if(ch===','&&!inQ){vals.push(cur.trim());cur='';}
+      else cur+=ch;
     }
     vals.push(cur.trim());
-    const obj = {};
-    headers.forEach((h, i) => obj[h] = (vals[i] || '').replace(/^"|"$/g,'').trim());
+    const obj={};
+    headers.forEach((h,i)=>obj[h]=(vals[i]||'').replace(/^"|"$/g,'').trim());
     return obj;
   });
 }
 
-function pill(label, type) { return `<span class="pill pill-${type}">${label}</span>`; }
+function pill(label,type){return`<span class="pill pill-${type}">${label}</span>`;}
 
-function buildKPIs(orders, customers) {
-  const now = today;
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const ordersThisMonth = orders.filter(o => { const d = parseDate(o['Order Date']); return d && d >= monthStart; });
-  const pendingPayment = orders.filter(o => !o['Payment Date']);
-  const activeCustomers = new Set(orders.filter(o => {
-    const d = parseDate(o['Order Date']);
-    const cutoff = new Date(now); cutoff.setDate(cutoff.getDate() - 60);
-    return d && d >= cutoff;
-  }).map(o => o['Customer Name'].toLowerCase())).size;
-
-  // revenue this month: need product prices — passed separately, skip for KPI simplicity, show order count
-  return `
-  <div class="cards-row">
-    <div class="kpi-card"><div class="kpi-label">Active Customers</div><div class="kpi-value">${activeCustomers}</div><div class="kpi-sub">ordered in last 60 days</div></div>
-    <div class="kpi-card"><div class="kpi-label">Orders This Month</div><div class="kpi-value">${ordersThisMonth.length}</div><div class="kpi-sub">${new Date().toLocaleString('en-IN',{month:'long'})}</div></div>
-    <div class="kpi-card" style="border-left-color:var(--red)"><div class="kpi-label">Pending Payments</div><div class="kpi-value" style="color:var(--red)">${pendingPayment.length}</div><div class="kpi-sub">orders unpaid</div></div>
+function buildKPIs(orders,customers){
+  const monthStart=new Date(today.getFullYear(),today.getMonth(),1);
+  const ordersThisMonth=orders.filter(o=>{const d=parseDate(o['Order Date']);return d&&d>=monthStart;});
+  const pendingPay=orders.filter(o=>!o['Payment Date']||!o['Payment Date'].trim());
+  const cutoff=new Date(today); cutoff.setDate(cutoff.getDate()-60);
+  const activeCust=new Set(orders.filter(o=>{const d=parseDate(o['Order Date']);return d&&d>=cutoff;}).map(o=>o['Customer Name'].toLowerCase())).size;
+  return`<div class="cards-row">
+    <div class="kpi-card"><div class="kpi-label">Active Customers</div><div class="kpi-value">${activeCust}</div><div class="kpi-sub">ordered in last 60 days</div></div>
+    <div class="kpi-card"><div class="kpi-label">Orders This Month</div><div class="kpi-value">${ordersThisMonth.length}</div><div class="kpi-sub">${today.toLocaleString('en-IN',{month:'long'})}</div></div>
+    <div class="kpi-card" style="border-left-color:var(--red)"><div class="kpi-label">Pending Payments</div><div class="kpi-value" style="color:var(--red)">${pendingPay.length}</div><div class="kpi-sub">orders unpaid</div></div>
     <div class="kpi-card" style="border-left-color:var(--green)"><div class="kpi-label">Total Customers</div><div class="kpi-value" style="color:var(--green)">${customers.length}</div><div class="kpi-sub">in master list</div></div>
   </div>`;
 }
 
-function buildReminders(loyal, orders, customers) {
-  const custMap = {};
-  customers.forEach(c => { custMap[c['Name'].toLowerCase()] = c; });
+function buildLoyalty(loyal,orders,customers){
+  const custMap={};
+  customers.forEach(c=>{ custMap[c['Name'].toLowerCase()]=c; });
 
   // last order date per customer+product
-  const lastOrder = {};
-  orders.forEach(o => {
-    const key = `${o['Customer Name'].toLowerCase()}||${o['Product Name'].toLowerCase()}`;
-    const d = parseDate(o['Order Date']);
-    if (d && (!lastOrder[key] || d > lastOrder[key])) lastOrder[key] = d;
+  const lastOrderMap={};
+  orders.forEach(o=>{
+    const key=`${o['Customer Name'].toLowerCase()}||${o['Product Name'].toLowerCase()}`;
+    const d=parseDate(o['Order Date']);
+    if(d&&(!lastOrderMap[key]||d>lastOrderMap[key])) lastOrderMap[key]=d;
   });
 
-  const rows = [];
-  loyal.forEach(lc => {
-    const cname = lc['Customer Name'];
-    const prod = lc['Product Loved'];
-    const freq = parseInt(lc['Usage Frequency Days']);
-    if (!cname || !prod || isNaN(freq)) return;
+  const rows=[];
+  loyal.forEach(lc=>{
+    const cname=lc['Customer Name'], prod=lc['Product Loved'];
+    const freq=parseInt(lc['Usage Frequency Days']);
+    if(!cname||!prod||isNaN(freq)) return;
+    const key=`${cname.toLowerCase()}||${prod.toLowerCase()}`;
+    const lastD=lastOrderMap[key];
+    if(!lastD) return; // skip edge case: no order history yet
 
-    const key = `${cname.toLowerCase()}||${prod.toLowerCase()}`;
-    const lastD = lastOrder[key];
-    if (!lastD) return; // edge case: skip if no order history
+    const reminderDate=new Date(lastD); reminderDate.setDate(reminderDate.getDate()+freq-7);
+    const overdueDate=new Date(reminderDate); overdueDate.setDate(overdueDate.getDate()+2);
+    const daysToReminder=diffDays(today,reminderDate);
 
-    const reminderDate = new Date(lastD); reminderDate.setDate(reminderDate.getDate() + freq - 7);
-    const overdueDate = new Date(reminderDate); overdueDate.setDate(overdueDate.getDate() + 2);
-    const daysToReminder = diffDays(today, reminderDate);
-
-    let status, statusType;
-    // check if a new order came in after reminder was due
-    const reorderedAfter = orders.some(o => {
-      const od = parseDate(o['Order Date']);
-      return o['Customer Name'].toLowerCase() === cname.toLowerCase()
-        && o['Product Name'].toLowerCase() === prod.toLowerCase()
-        && od && od > lastD;
+    // check if already reordered after the last tracked order
+    const reordered=orders.some(o=>{
+      const od=parseDate(o['Order Date']);
+      return o['Customer Name'].toLowerCase()===cname.toLowerCase()
+        && o['Product Name'].toLowerCase()===prod.toLowerCase()
+        && od && od>lastD;
     });
-    if (reorderedAfter) return; // reordered, don't show
+    if(reordered) return;
 
-    if (today > overdueDate) { status = 'Overdue'; statusType = 'red'; }
-    else if (daysToReminder <= 7 && daysToReminder >= 0) { status = 'Due this week'; statusType = 'amber'; }
-    else if (daysToReminder < 0 && today <= overdueDate) { status = 'Remind now'; statusType = 'amber'; }
-    else { status = `In ${daysToReminder}d`; statusType = 'green'; }
+    let status,statusType;
+    if(today>overdueDate){status='Overdue';statusType='red';}
+    else if(daysToReminder<=0){status='Remind Now';statusType='amber';}
+    else if(daysToReminder<=7){status='Due This Week';statusType='amber';}
+    else{status=`In ${daysToReminder}d`;statusType='green';}
 
-    const cust = custMap[cname.toLowerCase()];
-    const phone = cust ? cust['Phone'] : '';
-    const waNum = phone.replace(/\D/g,'');
-    const waMsg = encodeURIComponent(`Hi ${cname.split(' ')[0]}! 🙏 Your ${prod} from Mini's Homely Masalas might be running low. Would you like to reorder? It takes 3-4 days to reach you. 🫙`);
+    const cust=custMap[cname.toLowerCase()];
+    const phone=cust?cust['Phone']:'';
+    const waNum=phone.replace(/\D/g,'');
+    const waMsg=encodeURIComponent(`Hi ${cname.split(' ')[0]}! 🙏 Your ${prod} from Mini's Homely Masalas might be running low. Would you like to reorder? It takes 3-4 days to reach you. 🫙`);
 
-    rows.push({ cname, prod, qty: lc['Qty'], freq, lastD, reminderDate, status, statusType, waNum, waMsg, daysToReminder });
+    rows.push({cname,prod,qty:lc['Qty'],freq,lastD,reminderDate,status,statusType,waNum,waMsg,daysToReminder});
   });
 
-  // sort: overdue first, then due this week, then upcoming
-  rows.sort((a,b) => a.daysToReminder - b.daysToReminder);
+  // sort: overdue → remind now → due this week → upcoming
+  const order={'Overdue':0,'Remind Now':1,'Due This Week':2};
+  rows.sort((a,b)=>(order[a.status]??3+a.daysToReminder)-(order[b.status]??3+b.daysToReminder));
 
-  const remindRows = rows.filter(r => r.statusType !== 'green');
-  const allRows = rows;
+  if(rows.length===0) return{tableHTML:'<div class="empty">No loyal customers with order history yet.</div>',count:0};
 
-  const remindHTML = remindRows.length === 0
-    ? '<div class="empty">No reminders due this week. 🎉</div>'
-    : `<div class="table-wrap"><table>
-        <thead><tr><th>Customer</th><th>Product</th><th>Usual Qty</th><th>Freq</th><th>Last Order</th><th>Remind By</th><th>Status</th><th>WhatsApp</th></tr></thead>
-        <tbody>${remindRows.map(r => `<tr>
-          <td><strong>${r.cname}</strong></td>
-          <td>${r.prod}</td>
-          <td>${r.qty}</td>
-          <td>${r.freq}d</td>
-          <td>${fmtDate(r.lastD)}</td>
-          <td>${fmtDate(r.reminderDate)}</td>
-          <td>${pill(r.status, r.statusType)}</td>
-          <td>${r.waNum ? `<a class="wa-btn" href="https://wa.me/${r.waNum}?text=${r.waMsg}" target="_blank">📲 WhatsApp</a>` : '—'}</td>
-        </tr>`).join('')}</tbody>
-      </table></div>`;
-
-  const loyalHTML = `<div class="table-wrap"><table>
-    <thead><tr><th>Customer</th><th>Product</th><th>Usual Qty</th><th>Every</th><th>Last Order</th><th>Next Reminder</th><th>Status</th></tr></thead>
-    <tbody>${allRows.map(r => `<tr>
+  // Single table — all loyal customers sorted by urgency
+  const tableHTML=`<div class="table-wrap"><table>
+    <thead><tr><th>Customer</th><th>Product</th><th>Usual Qty</th><th>Every</th><th>Last Order</th><th>Remind By</th><th>Status</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr>
       <td><strong>${r.cname}</strong></td>
-      <td>${r.prod}</td>
-      <td>${r.qty}</td>
-      <td>${r.freq}d</td>
-      <td>${fmtDate(r.lastD)}</td>
-      <td>${fmtDate(r.reminderDate)}</td>
-      <td>${pill(r.status, r.statusType)}</td>
+      <td>${r.prod}</td><td>${r.qty}</td><td>${r.freq}d</td>
+      <td>${fmtDate(r.lastD)}</td><td>${fmtDate(r.reminderDate)}</td>
+      <td>${pill(r.status,r.statusType)}</td>
     </tr>`).join('')}</tbody>
   </table></div>`;
 
-  return { remindHTML, loyalHTML, remindCount: remindRows.length, loyalCount: allRows.length };
+  return{tableHTML,count:rows.length};
 }
 
-function buildPending(orders, products) {
-  const priceMap = {};
-  products.forEach(p => { priceMap[p['Name'].toLowerCase()] = { price: parseFloat(p['Price']) || 0, packSize: parseFloat(p['Pack Size']) || 1 }; });
+function buildPending(orders,products){
+  const priceMap={};
+  products.forEach(p=>{priceMap[p['Name'].toLowerCase()]={price:parseFloat(p['Price'])||0,packSize:parseFloat(p['Pack Size'])||1};});
 
-  const pendingDelivery = orders.filter(o => {
-    const del = parseDate(o['Delivery Date']);
-    return del && del >= today;
-  });
-
-  const pendingPayment = orders.filter(o => !o['Payment Date'] || !o['Payment Date'].trim());
-
-  function orderAmount(o) {
-    const pm = priceMap[o['Product Name'].toLowerCase()];
-    if (!pm || !pm.packSize) return 0;
-    const qty = parseFloat(o['Qty']) || 0;
-    return ((qty / pm.packSize) * pm.price);
+  function amt(o){
+    const pm=priceMap[o['Product Name'].toLowerCase()];
+    if(!pm||!pm.packSize) return 0;
+    return((parseFloat(o['Qty'])||0)/pm.packSize)*pm.price;
   }
 
-  const delivHTML = pendingDelivery.length === 0
-    ? '<div class="empty">No pending deliveries.</div>'
-    : `<div class="table-wrap"><table>
-        <thead><tr><th>Customer</th><th>Product</th><th>Qty</th><th>Order Date</th><th>Delivery Date</th></tr></thead>
-        <tbody>${pendingDelivery.map(o => `<tr>
+  const pendingDel=orders.filter(o=>{const d=parseDate(o['Delivery Date']);return d&&d>=today;});
+  const pendingPay=orders.filter(o=>!o['Payment Date']||!o['Payment Date'].trim());
+  const totalPending=pendingPay.reduce((s,o)=>s+amt(o),0);
+
+  const delivHTML=pendingDel.length===0
+    ?'<div class="empty">No pending deliveries.</div>'
+    :`<div class="table-wrap"><table>
+      <thead><tr><th>Customer</th><th>Product</th><th>Qty</th><th>Order Date</th><th>Delivery Date</th></tr></thead>
+      <tbody>${pendingDel.map(o=>`<tr>
+        <td><strong>${o['Customer Name']}</strong></td>
+        <td>${o['Product Name']}</td><td>${o['Qty']}</td>
+        <td>${fmtDate(parseDate(o['Order Date']))}</td>
+        <td>${fmtDate(parseDate(o['Delivery Date']))}</td>
+      </tr>`).join('')}</tbody>
+    </table></div>`;
+
+  const payHTML=pendingPay.length===0
+    ?'<div class="empty">No pending payments. 💚</div>'
+    :`<div class="table-wrap"><table>
+      <thead><tr><th>Customer</th><th>Product</th><th>Qty</th><th>Order Date</th><th>Amount (₹)</th><th>Days Pending</th></tr></thead>
+      <tbody>${pendingPay.map(o=>{
+        const od=parseDate(o['Order Date']);
+        const days=od?diffDays(od,today):'?';
+        const a=amt(o);
+        return`<tr>
           <td><strong>${o['Customer Name']}</strong></td>
-          <td>${o['Product Name']}</td>
-          <td>${o['Qty']}</td>
-          <td>${fmtDate(parseDate(o['Order Date']))}</td>
-          <td>${fmtDate(parseDate(o['Delivery Date']))}</td>
-        </tr>`).join('')}</tbody>
-      </table></div>`;
+          <td>${o['Product Name']}</td><td>${o['Qty']}</td>
+          <td>${fmtDate(od)}</td>
+          <td>₹${a>0?a.toFixed(0):'—'}</td>
+          <td style="color:${days>14?'var(--red)':'inherit'}">${days}d</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>
+    <div class="pending-total">Total Pending: ₹${totalPending>0?totalPending.toFixed(0):'—'}</div>`;
 
-  const totalPending = pendingPayment.reduce((s,o) => s + orderAmount(o), 0);
-  const payHTML = pendingPayment.length === 0
-    ? '<div class="empty">No pending payments. 💚</div>'
-    : `<div class="table-wrap"><table>
-        <thead><tr><th>Customer</th><th>Product</th><th>Qty</th><th>Order Date</th><th>Amount (₹)</th><th>Days Pending</th></tr></thead>
-        <tbody>${pendingPayment.map(o => {
-          const od = parseDate(o['Order Date']);
-          const days = od ? diffDays(od, today) : '?';
-          const amt = orderAmount(o);
-          return `<tr>
-            <td><strong>${o['Customer Name']}</strong></td>
-            <td>${o['Product Name']}</td>
-            <td>${o['Qty']}</td>
-            <td>${fmtDate(od)}</td>
-            <td>₹${amt > 0 ? amt.toFixed(0) : '—'}</td>
-            <td style="color:${days > 14 ? 'var(--red)' : 'inherit'}">${days}d</td>
-          </tr>`;
-        }).join('')}</tbody>
-      </table></div>
-      <div style="text-align:right;margin-top:8px;font-weight:600;color:var(--red);font-size:0.85rem;">Total Pending: ₹${totalPending > 0 ? totalPending.toFixed(0) : '—'}</div>`;
-
-  return { delivHTML, payHTML, pendingPayCount: pendingPayment.length, pendingDelivCount: pendingDelivery.length };
+  return{delivHTML,payHTML,pendingDelCount:pendingDel.length,pendingPayCount:pendingPay.length};
 }
 
-async function init() {
-  const app = document.getElementById('app');
-  document.getElementById('today-date').textContent = today.toLocaleDateString('en-IN', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+async function init(){
+  const app=document.getElementById('app');
+  const btn=document.getElementById('refreshBtn');
+  btn.disabled=true; btn.textContent='⟳ Loading…';
+  document.getElementById('today-date').textContent=today.toLocaleDateString('en-IN',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+  app.innerHTML='<div class="loading"><div class="spinner"></div>Fetching latest data…</div>';
 
-  try {
-    const [customers, products, orders, loyal] = await Promise.all([
-      fetchCSV(URLS.customers),
-      fetchCSV(URLS.products),
-      fetchCSV(URLS.orders),
-      fetchCSV(URLS.loyal),
+  try{
+    const[customers,products,orders,loyal]=await Promise.all([
+      fetchCSV(SHEET_TABS.customers),
+      fetchCSV(SHEET_TABS.products),
+      fetchCSV(SHEET_TABS.orders),
+      fetchCSV(SHEET_TABS.loyal),
     ]);
 
-    document.getElementById('last-updated').textContent = `Last refreshed: ${new Date().toLocaleTimeString('en-IN')}`;
+    document.getElementById('last-updated').textContent='Last refreshed: '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
 
-    const kpisHTML = buildKPIs(orders, customers);
-    const { remindHTML, loyalHTML, remindCount, loyalCount } = buildReminders(loyal, orders, customers);
-    const { delivHTML, payHTML, pendingPayCount, pendingDelivCount } = buildPending(orders, products);
+    const kpisHTML=buildKPIs(orders,customers);
+    const{tableHTML,count}=buildLoyalty(loyal,orders,customers);
+    const{delivHTML,payHTML,pendingDelCount,pendingPayCount}=buildPending(orders,products);
 
-    app.innerHTML = `
+    app.innerHTML=`
       ${kpisHTML}
-
       <div class="section">
-        <div class="section-title">📲 Remind This Week <span class="badge">${remindCount}</span></div>
-        ${remindHTML}
+        <div class="section-title">🫙 Loyal Customers — Reorder Tracker <span class="badge">${count||0} tracked</span></div>
+        ${tableHTML}
       </div>
-
-      <div class="section">
-        <div class="section-title">🫙 Loyalty Health <span class="badge">${loyalCount} loyal customers</span></div>
-        ${loyalHTML}
-      </div>
-
       <div class="section">
         <div class="section-title">📦 Pending Orders & Payments</div>
         <div class="pending-grid">
-          <div>
-            <div class="sub-section-title">🚚 Deliveries in Pipeline (${pendingDelivCount})</div>
-            ${delivHTML}
-          </div>
-          <div>
-            <div class="sub-section-title">💰 Payments Awaited (${pendingPayCount})</div>
-            ${payHTML}
-          </div>
+          <div><div class="sub-title">🚚 Deliveries in Pipeline (${pendingDelCount})</div>${delivHTML}</div>
+          <div><div class="sub-title">💰 Payments Awaited (${pendingPayCount})</div>${payHTML}</div>
         </div>
-      </div>
-    `;
-  } catch(e) {
-    app.innerHTML = `<div class="error-msg">⚠️ Could not load data. Check that the Google Sheet is published to web and URLs are correct.<br><small>${e.message}</small></div>`;
+      </div>`;
+  }catch(e){
+    app.innerHTML=`<div class="error-msg">⚠️ Could not load data. Check your internet connection and that the Google Sheet is published to web.<br><small>${e.message}</small></div>`;
+    document.getElementById('last-updated').textContent='Failed to load';
+  }finally{
+    btn.disabled=false; btn.textContent='⟳ Refresh';
   }
 }
 
