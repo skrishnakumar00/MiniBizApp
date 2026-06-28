@@ -141,11 +141,13 @@
 </div>
 
 <script>
+const BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS10Pxvujhj60pRw55jBG9TDmDVzJ2jYF8NpFg0x5zWYteG03IzNQCqnBteN_fB-4r1xeymFNisl7Hu/pub';
+const PROXY = 'https://corsproxy.io/?url=';
 const URLS = {
-  customers:      'https://api.allorigins.win/get?url=' + encodeURIComponent('https://docs.google.com/spreadsheets/d/e/2PACX-1vS10Pxvujhj60pRw55jBG9TDmDVzJ2jYF8NpFg0x5zWYteG03IzNQCqnBteN_fB-4r1xeymFNisl7Hu/pub?gid=0&single=true&output=csv'),
-  products:       'https://api.allorigins.win/get?url=' + encodeURIComponent('https://docs.google.com/spreadsheets/d/e/2PACX-1vS10Pxvujhj60pRw55jBG9TDmDVzJ2jYF8NpFg0x5zWYteG03IzNQCqnBteN_fB-4r1xeymFNisl7Hu/pub?gid=1428094373&single=true&output=csv'),
-  orders:         'https://api.allorigins.win/get?url=' + encodeURIComponent('https://docs.google.com/spreadsheets/d/e/2PACX-1vS10Pxvujhj60pRw55jBG9TDmDVzJ2jYF8NpFg0x5zWYteG03IzNQCqnBteN_fB-4r1xeymFNisl7Hu/pub?gid=718714399&single=true&output=csv'),
-  loyal:          'https://api.allorigins.win/get?url=' + encodeURIComponent('https://docs.google.com/spreadsheets/d/e/2PACX-1vS10Pxvujhj60pRw55jBG9TDmDVzJ2jYF8NpFg0x5zWYteG03IzNQCqnBteN_fB-4r1xeymFNisl7Hu/pub?gid=1826309711&single=true&output=csv'),
+  customers: PROXY + encodeURIComponent(BASE + '?gid=0&single=true&output=csv'),
+  products:  PROXY + encodeURIComponent(BASE + '?gid=1428094373&single=true&output=csv'),
+  orders:    PROXY + encodeURIComponent(BASE + '?gid=718714399&single=true&output=csv'),
+  loyal:     PROXY + encodeURIComponent(BASE + '?gid=1826309711&single=true&output=csv'),
 };
 
 const today = new Date(); today.setHours(0,0,0,0);
@@ -169,8 +171,9 @@ function diffDays(a, b) { return Math.round((b - a) / 86400000); }
 
 async function fetchCSV(url) {
   const r = await fetch(url);
-  const j = await r.json();
-  return parseCSV(j.contents);
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  const text = await r.text();
+  return parseCSV(text);
 }
 function parseCSV(text) {
   const lines = text.trim().split('\n');
