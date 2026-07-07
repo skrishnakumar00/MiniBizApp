@@ -296,7 +296,7 @@ function renderOperations(){
         return`<tr><td><strong>${o['Customer Name']}</strong></td><td>${o['Product Name']}</td><td>${o['Qty']}</td>
         <td>${fmtDate(od)}</td><td>${a>0?inr(a):'—'}</td><td style="color:${days>14?'var(--red)':'inherit'}">${days}d</td></tr>`;
       }).join('')}</tbody>
-    </table><div class="pending-total">Total Pending: ${inr(pendingPayTotal)}</div>`;
+    </table><div class="pending-total">Total Pending: ${inr(pendingPayTotal)}</div></div>`;
 
   return `${kpis}
     <div class="section"><div class="section-title">📲 Reorder Tracker <span class="badge">${rows.length} loyal</span></div>${trackerHTML}</div>
@@ -438,28 +438,8 @@ function renderLoyal(){
 /* ===================== TAB SWITCHING ===================== */
 const RENDERERS={operations:renderOperations,mis:renderMIS,customers:renderCustomers,products:renderProducts,loyal:renderLoyal};
 function switchTab(tab){
-  console.log('switchTab called with:', tab);
   document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
-  const panels = document.querySelectorAll('.panel');
-  panels.forEach(p=>{
-    const shouldBeActive = p.id==='panel-'+tab;
-    p.classList.toggle('active', shouldBeActive);
-  });
-  // check AFTER toggling, on the target panel specifically
-  const target = document.getElementById('panel-'+tab);
-  if(target){
-    const cs = getComputedStyle(target);
-    console.log('TARGET PANEL', target.id, {
-      classList: target.className,
-      computedDisplay: cs.display,
-      offsetHeight: target.offsetHeight,
-      offsetWidth: target.offsetWidth,
-      childElementCount: target.childElementCount,
-      firstChildTag: target.firstElementChild ? target.firstElementChild.outerHTML.substring(0,150) : 'NONE'
-    });
-  } else {
-    console.log('!!! panel-'+tab+' NOT FOUND IN DOM !!!');
-  }
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+tab));
 }
 
 /* ===================== INIT ===================== */
@@ -479,25 +459,15 @@ async function init(){
       fetchCSV(SHEET_TABS.settings).catch(()=>[]) // settings optional until gid is set
     ]);
     DATA={customers,products,orders,loyal,settings};
-    console.log('DATA loaded:', {
-      customers: customers.length, products: products.length,
-      orders: orders.length, loyal: loyal.length, settings: settings.length
-    });
-    console.log('Sample customer row:', customers[0]);
-    console.log('Sample product row:', products[0]);
-    console.log('Sample order row:', orders[0]);
-    console.log('Sample loyal row:', loyal[0]);
 
     document.getElementById('last-updated').textContent='Last refreshed: '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
 
     let opsHTML, misHTML, custHTML, prodHTML, loyalHTML;
-    try { opsHTML = renderOperations(); } catch(err) { console.error('renderOperations FAILED:', err); opsHTML = '<div class="error-msg">Operations render error: '+err.message+'</div>'; }
-    try { misHTML = renderMIS(); } catch(err) { console.error('renderMIS FAILED:', err); misHTML = '<div class="error-msg">MIS render error: '+err.message+'</div>'; }
-    try { custHTML = renderCustomers(); } catch(err) { console.error('renderCustomers FAILED:', err); custHTML = '<div class="error-msg">Customers render error: '+err.message+'</div>'; }
-    try { prodHTML = renderProducts(); } catch(err) { console.error('renderProducts FAILED:', err); prodHTML = '<div class="error-msg">Products render error: '+err.message+'</div>'; }
-    try { loyalHTML = renderLoyal(); } catch(err) { console.error('renderLoyal FAILED:', err); loyalHTML = '<div class="error-msg">Loyal render error: '+err.message+'</div>'; }
-
-    console.log('Rendered HTML lengths:', {ops: opsHTML.length, mis: misHTML.length, cust: custHTML.length, prod: prodHTML.length, loyal: loyalHTML.length});
+    try { opsHTML = renderOperations(); } catch(err) { opsHTML = '<div class="error-msg">Operations render error: '+err.message+'</div>'; }
+    try { misHTML = renderMIS(); } catch(err) { misHTML = '<div class="error-msg">MIS render error: '+err.message+'</div>'; }
+    try { custHTML = renderCustomers(); } catch(err) { custHTML = '<div class="error-msg">Customers render error: '+err.message+'</div>'; }
+    try { prodHTML = renderProducts(); } catch(err) { prodHTML = '<div class="error-msg">Products render error: '+err.message+'</div>'; }
+    try { loyalHTML = renderLoyal(); } catch(err) { loyalHTML = '<div class="error-msg">Loyal render error: '+err.message+'</div>'; }
 
     app.innerHTML=`
       <div class="panel active" id="panel-operations">${opsHTML}</div>
