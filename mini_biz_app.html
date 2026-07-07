@@ -116,7 +116,7 @@ const SHEET_TABS = {
   products:  BASE + '?gid=1428094373&single=true&output=csv',
   orders:    BASE + '?gid=718714399&single=true&output=csv',
   loyal:     BASE + '?gid=1826309711&single=true&output=csv',
-  settings:  BASE + '?gid=SETTINGS_GID_HERE&single=true&output=csv'
+  settings:  BASE + '?gid=1019938917&single=true&output=csv'
 };
 
 const today = new Date(); today.setHours(0,0,0,0);
@@ -441,12 +441,25 @@ function switchTab(tab){
   console.log('switchTab called with:', tab);
   document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
   const panels = document.querySelectorAll('.panel');
-  console.log('Found panels:', panels.length, Array.from(panels).map(p=>p.id));
   panels.forEach(p=>{
     const shouldBeActive = p.id==='panel-'+tab;
     p.classList.toggle('active', shouldBeActive);
-    console.log(p.id, '-> active:', shouldBeActive, '| content length:', p.innerHTML.length);
   });
+  // check AFTER toggling, on the target panel specifically
+  const target = document.getElementById('panel-'+tab);
+  if(target){
+    const cs = getComputedStyle(target);
+    console.log('TARGET PANEL', target.id, {
+      classList: target.className,
+      computedDisplay: cs.display,
+      offsetHeight: target.offsetHeight,
+      offsetWidth: target.offsetWidth,
+      childElementCount: target.childElementCount,
+      firstChildTag: target.firstElementChild ? target.firstElementChild.outerHTML.substring(0,150) : 'NONE'
+    });
+  } else {
+    console.log('!!! panel-'+tab+' NOT FOUND IN DOM !!!');
+  }
 }
 
 /* ===================== INIT ===================== */
