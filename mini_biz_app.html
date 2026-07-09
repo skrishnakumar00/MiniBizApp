@@ -14,72 +14,114 @@
   *{box-sizing:border-box;margin:0;padding:0;}
   body{background:var(--cream);font-family:'Inter',sans-serif;color:var(--ink);min-height:100vh;}
 
-  header{background:var(--ink);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
-  .hdr-left h1{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.35rem;}
-  .hdr-left #last-updated{color:#9E8B78;font-size:0.72rem;margin-top:3px;}
-  .hdr-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-  .hdr-right #today-date{color:#9E8B78;font-size:0.75rem;}
-  .btn-sheet{color:rgba(255,255,255,0.85);font-size:0.75rem;font-weight:600;text-decoration:none;
-    border:1px solid rgba(255,255,255,0.3);border-radius:5px;padding:5px 12px;transition:background 0.15s;}
+  header{background:var(--ink);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .hdr-left h1{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.3rem;}
+  .hdr-left #last-updated{color:#9E8B78;font-size:0.7rem;margin-top:3px;}
+  .hdr-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .hdr-right #today-date{color:#9E8B78;font-size:0.72rem;}
+  .btn-sheet{color:rgba(255,255,255,0.85);font-size:0.72rem;font-weight:600;text-decoration:none;
+    border:1px solid rgba(255,255,255,0.3);border-radius:5px;padding:6px 12px;transition:background 0.15s;}
   .btn-sheet:hover{background:rgba(255,255,255,0.1);}
-  .btn-refresh{background:var(--gold);color:white;border:none;border-radius:5px;padding:6px 14px;
-    font-size:0.75rem;font-weight:600;cursor:pointer;transition:background 0.15s;}
+  .btn-refresh{background:var(--gold);color:white;border:none;border-radius:5px;padding:7px 14px;
+    font-size:0.72rem;font-weight:600;cursor:pointer;transition:background 0.15s;}
   .btn-refresh:hover{background:#a8691f;}
   .btn-refresh:disabled{opacity:0.6;cursor:not-allowed;}
 
-  nav.tabs{background:#2A1810;display:flex;gap:2px;padding:0 28px;overflow-x:auto;}
+  nav.tabs{background:#2A1810;display:flex;gap:2px;padding:0 20px;overflow-x:auto;position:sticky;top:0;z-index:50;
+    -webkit-overflow-scrolling:touch;}
   nav.tabs button{background:transparent;border:none;color:#C9B8A6;font-family:'Inter',sans-serif;
-    font-size:0.82rem;font-weight:600;padding:12px 18px;cursor:pointer;white-space:nowrap;
+    font-size:0.8rem;font-weight:600;padding:13px 16px;cursor:pointer;white-space:nowrap;
     border-bottom:3px solid transparent;transition:all 0.15s;}
   nav.tabs button:hover{color:var(--gold-light);}
   nav.tabs button.active{color:var(--gold);border-bottom-color:var(--gold);}
 
-  .container{max-width:1100px;margin:0 auto;padding:26px 18px 48px;}
+  .container{max-width:1100px;margin:0 auto;padding:22px 16px 48px;}
   .panel{display:none;}
   .panel.active{display:block;}
 
-  .section-title{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--ink);
+  .section-title{font-family:'Playfair Display',serif;font-size:1.02rem;color:var(--ink);
     margin-bottom:13px;padding-bottom:6px;border-bottom:2px solid var(--gold-light);
-    display:flex;align-items:center;gap:8px;}
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
   .section-title .badge{background:var(--gold);color:white;font-family:'Inter',sans-serif;
-    font-size:0.68rem;font-weight:600;padding:2px 8px;border-radius:20px;}
-  .section{margin-bottom:34px;}
+    font-size:0.66rem;font-weight:600;padding:2px 8px;border-radius:20px;}
+  .section{margin-bottom:32px;}
 
   .loading{text-align:center;padding:60px 20px;color:var(--muted);font-size:0.9rem;}
   .spinner{width:34px;height:34px;border:3px solid var(--gold-light);border-top-color:var(--gold);
     border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 14px;}
   @keyframes spin{to{transform:rotate(360deg);}}
   .error-msg{background:var(--red-light);border-left:4px solid var(--red);padding:12px 16px;
-    border-radius:6px;color:var(--red);font-size:0.82rem;margin-bottom:18px;}
-  .empty{color:var(--muted);font-size:0.82rem;font-style:italic;padding:10px 0;}
+    border-radius:6px;color:var(--red);font-size:0.8rem;margin-bottom:16px;}
+  .empty{color:var(--muted);font-size:0.8rem;font-style:italic;padding:10px 0;}
 
-  .cards-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px;margin-bottom:28px;}
-  .kpi-card{background:var(--card);border-radius:10px;padding:16px 15px;
+  .cards-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:26px;}
+  .kpi-card{background:var(--card);border-radius:10px;padding:14px 13px;
     border-left:4px solid var(--gold);box-shadow:0 1px 4px rgba(28,16,8,0.07);}
-  .kpi-label{font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:5px;}
-  .kpi-value{font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--ink);line-height:1.1;}
-  .kpi-sub{font-size:0.68rem;color:var(--muted);margin-top:3px;}
+  .kpi-label{font-size:0.65rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:5px;}
+  .kpi-value{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--ink);line-height:1.1;}
+  .kpi-sub{font-size:0.65rem;color:var(--muted);margin-top:3px;}
 
   .table-wrap{overflow-x:auto;border-radius:10px;box-shadow:0 1px 4px rgba(28,16,8,0.07);}
-  table{width:100%;border-collapse:collapse;background:var(--card);font-size:0.81rem;}
+  table{width:100%;border-collapse:collapse;background:var(--card);font-size:0.8rem;}
   thead tr{background:var(--ink);}
-  thead th{color:var(--gold-light);font-weight:600;font-size:0.66rem;text-transform:uppercase;
+  thead th{color:var(--gold-light);font-weight:600;font-size:0.65rem;text-transform:uppercase;
     letter-spacing:0.04em;padding:9px 12px;text-align:left;white-space:nowrap;}
   tbody tr{border-bottom:1px solid var(--border);}
   tbody tr:last-child{border-bottom:none;}
   tbody tr:hover{background:#FDF8F2;}
   tbody td{padding:9px 12px;vertical-align:middle;}
 
-  .pill{display:inline-block;padding:3px 9px;border-radius:20px;font-size:0.67rem;font-weight:600;white-space:nowrap;}
+  .pill{display:inline-block;padding:3px 9px;border-radius:20px;font-size:0.66rem;font-weight:600;white-space:nowrap;}
   .pill-green{background:var(--green-light);color:var(--green);}
   .pill-amber{background:var(--amber-light);color:var(--amber);}
   .pill-red{background:var(--red-light);color:var(--red);}
 
-  .pending-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
-  @media(max-width:680px){.pending-grid{grid-template-columns:1fr;} nav.tabs{padding:0 10px;}}
-  .sub-title{font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;
+  .pending-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .sub-title{font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;
     color:var(--muted);margin-bottom:9px;}
-  .pending-total{text-align:right;margin-top:7px;font-weight:600;color:var(--red);font-size:0.82rem;}
+  .pending-total{text-align:right;margin-top:7px;font-weight:600;color:var(--red);font-size:0.8rem;}
+
+  .filter-pills{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .filter-pill{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:8px 16px;
+    font-size:0.76rem;font-weight:600;color:var(--muted);cursor:pointer;transition:all 0.15s;}
+  .filter-pill.active{background:var(--gold);color:white;border-color:var(--gold);}
+
+  .filter-row{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+  .filter-row select{flex:1;min-width:150px;padding:9px 12px;border-radius:8px;border:1px solid var(--border);
+    font-family:'Inter',sans-serif;font-size:0.82rem;background:var(--card);color:var(--ink);}
+
+  .view-history-link{color:var(--gold);font-weight:600;font-size:0.74rem;cursor:pointer;
+    text-decoration:underline;white-space:nowrap;}
+  .history-row{display:none;}
+  .history-row.open{display:table-row;}
+  .history-cell{background:#FDF8F2 !important;padding:14px !important;}
+  .history-summary{display:flex;gap:22px;margin-bottom:12px;flex-wrap:wrap;}
+  .history-summary .hs-label{display:block;font-size:0.63rem;text-transform:uppercase;color:var(--muted);font-weight:600;letter-spacing:0.04em;}
+  .history-summary .hs-value{display:block;font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--ink);margin-top:2px;}
+  .interval-note{font-size:0.7rem;color:var(--muted);margin-top:8px;font-style:italic;}
+
+  @media(max-width:700px){
+    .pending-grid{grid-template-columns:1fr;}
+    nav.tabs{padding:0 8px;}
+    header{padding:12px 16px;}
+    .hdr-left h1{font-size:1.1rem;}
+    .container{padding:16px 12px 40px;}
+
+    .responsive-table thead{display:none;}
+    .responsive-table, .responsive-table tbody, .responsive-table tr{display:block;width:100%;}
+    .responsive-table tr{margin-bottom:10px;border:1px solid var(--border);border-radius:10px;
+      padding:6px 12px;background:var(--card);}
+    .responsive-table td{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;
+      padding:7px 0;border-bottom:1px dashed var(--border);text-align:right;font-size:0.8rem;}
+    .responsive-table td:last-child{border-bottom:none;}
+    .responsive-table td::before{content:attr(data-label);font-weight:600;color:var(--muted);
+      text-align:left;font-size:0.63rem;text-transform:uppercase;letter-spacing:0.03em;flex-shrink:0;}
+    .responsive-table td.no-label::before{content:none;}
+    .responsive-table td.no-label{justify-content:flex-end;}
+    .responsive-table td.history-cell{display:block;text-align:left;}
+    .responsive-table td.history-cell::before{content:none;}
+    .history-row.open{display:block !important;}
+  }
 </style>
 </head>
 <body>
@@ -101,7 +143,7 @@
   <button data-tab="mis" onclick="switchTab('mis')">📊 MIS</button>
   <button data-tab="customers" onclick="switchTab('customers')">👥 Customers</button>
   <button data-tab="products" onclick="switchTab('products')">🧂 Products</button>
-  <button data-tab="loyal" onclick="switchTab('loyal')">🫙 Loyal Customers</button>
+  <button data-tab="history" onclick="switchTab('history')">🧾 Order History</button>
 </nav>
 
 <div class="container" id="app">
@@ -115,7 +157,6 @@ const SHEET_TABS = {
   customers: BASE + '?gid=0&single=true&output=csv',
   products:  BASE + '?gid=1428094373&single=true&output=csv',
   orders:    BASE + '?gid=718714399&single=true&output=csv',
-  loyal:     BASE + '?gid=1826309711&single=true&output=csv',
   settings:  BASE + '?gid=1019938917&single=true&output=csv'
 };
 
@@ -132,13 +173,27 @@ function parseDate(s){
   else{p=new Date(s);}
   return isNaN(p)?null:(p.setHours(0,0,0,0),p);
 }
-function diffDays(a,b){return Math.round((b-a)/86400000);}
+function diffDays(from,to){return Math.round((to-from)/86400000);}
 function monthKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
 function monthLabel(key){const[y,m]=key.split('-');return new Date(y,m-1,1).toLocaleString('en-IN',{month:'long',year:'numeric'});}
 function pill(label,type){return`<span class="pill pill-${type}">${label}</span>`;}
 function pct(n){return isFinite(n)?n.toFixed(0)+'%':'—';}
 function inr(n){return isFinite(n)?'₹'+n.toFixed(0):'—';}
 function parsePct(s){ if(!s) return 0; return parseFloat(String(s).replace('%',''))||0; }
+
+function kpiCard(label,value,opts={}){
+  const bStyle=opts.color?` style="border-left-color:var(--${opts.color})"`:'';
+  const vStyle=opts.color?` style="color:var(--${opts.color})"`:'';
+  return `<div class="kpi-card"${bStyle}><div class="kpi-label">${label}</div><div class="kpi-value"${vStyle}>${value}</div>${opts.sub?`<div class="kpi-sub">${opts.sub}</div>`:''}</div>`;
+}
+function kpiRow(...cards){ return `<div class="cards-row">${cards.join('')}</div>`; }
+
+function renderTable(headers, rows, opts={}){
+  if(rows.length===0) return `<div class="empty">${opts.emptyText||'No data.'}</div>`;
+  const thead='<tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr>';
+  const tbody=rows.map(cells=>'<tr>'+cells.map((c,i)=>`<td data-label="${headers[i]}">${c}</td>`).join('')+'</tr>').join('');
+  return `<div class="table-wrap"><table class="responsive-table"><thead>${thead}</thead><tbody>${tbody}</tbody></table></div>`;
+}
 
 async function fetchCSV(rawUrl){
   const url = rawUrl + '&t=' + Date.now();
@@ -194,112 +249,141 @@ function lineProfit(o,priceMap){
   if(!pm) return 0;
   return lineAmount(o,priceMap) * (pm.marginPct/100);
 }
-function buildLoyalSet(loyal){
-  return new Set(loyal.map(l=>l['Customer Name'].toLowerCase()).filter(Boolean));
+function isLoyalRow(c){
+  for(const k in c){
+    if(k.toLowerCase().includes('loyal')) return (c[k]||'').trim().toUpperCase().startsWith('Y');
+  }
+  return false;
+}
+function getSettingByKeyword(keyword){
+  const row=(DATA.settings||[]).find(s=>(s['Setting Name']||'').toLowerCase().includes(keyword));
+  return row ? row['Value'] : null;
 }
 
-/* ===================== LOYALTY / REORDER CALC ===================== */
-function computeLoyaltyRows(loyal,orders){
-  const lastOrderMap={};
-  orders.forEach(o=>{
-    const key=`${o['Customer Name'].toLowerCase()}||${o['Product Name'].toLowerCase()}`;
-    const d=parseDate(o['Order Date']);
-    if(d&&(!lastOrderMap[key]||d>lastOrderMap[key])) lastOrderMap[key]=d;
+/* ===================== CUSTOMER ORDER HISTORY (shared) ===================== */
+function buildCustomerHistoryHTML(name,priceMap){
+  let custOrders=DATA.orders.filter(o=>o['Customer Name'].toLowerCase()===name.toLowerCase());
+  custOrders.sort((a,b)=>{
+    const da=parseDate(a['Order Date']), db=parseDate(b['Order Date']);
+    return (db?db.getTime():0)-(da?da.getTime():0);
   });
+  const totalOrders=custOrders.length;
+  const totalRevenue=custOrders.reduce((s,o)=>s+lineAmount(o,priceMap),0);
+  const lastDate=custOrders.length?parseDate(custOrders[0]['Order Date']):null;
 
-  const rows=[];
-  loyal.forEach(lc=>{
-    const cname=lc['Customer Name'], prod=lc['Product Loved'];
-    const freq=parseInt(lc['Usage Frequency Days']);
-    if(!cname||!prod) return;
-    const key=`${cname.toLowerCase()}||${prod.toLowerCase()}`;
-    const lastD=lastOrderMap[key];
-    if(!lastD) return; // edge case: no order history yet, skip
+  const summary=`<div class="history-summary">
+    <div><span class="hs-label">Total Orders</span><span class="hs-value">${totalOrders}</span></div>
+    <div><span class="hs-label">Total Revenue</span><span class="hs-value">${inr(totalRevenue)}</span></div>
+    <div><span class="hs-label">Last Order</span><span class="hs-value">${lastDate?fmtDate(lastDate):'—'}</span></div>
+  </div>`;
 
-    // reordered after last tracked date?
-    const reordered=orders.some(o=>{
-      const od=parseDate(o['Order Date']);
-      return o['Customer Name'].toLowerCase()===cname.toLowerCase()
-        && o['Product Name'].toLowerCase()===prod.toLowerCase()
-        && od && od>lastD;
-    });
-    if(reordered) return;
-
-    let reminderDate;
-    const manualNext=parseDate(lc['Next Reminder Date']);
-    if(manualNext){
-      reminderDate=manualNext;
-    } else if(!isNaN(freq)){
-      reminderDate=new Date(lastD); reminderDate.setDate(reminderDate.getDate()+freq-7);
-    } else {
-      return; // no manual date and no valid frequency, can't calculate
-    }
-
-    const overdueDate=new Date(reminderDate); overdueDate.setDate(overdueDate.getDate()+2);
-    const daysToReminder=diffDays(today,reminderDate);
-
-    let status,statusType;
-    if(today>overdueDate){status='Overdue';statusType='red';}
-    else if(daysToReminder<=0){status='Remind Now';statusType='amber';}
-    else if(daysToReminder<=7){status='Due This Week';statusType='amber';}
-    else{status=`In ${daysToReminder}d`;statusType='green';}
-
-    rows.push({srNo:lc['Sr No'],cname,prod,qty:lc['Qty'],freq:isNaN(freq)?'—':freq+'d',
-      lastD,reminderDate,status,statusType,daysToReminder,notes:lc['Notes']||''});
+  const rows=custOrders.map(o=>{
+    const paid=(o['Payment Date']&&o['Payment Date'].trim())?pill('Paid','green'):pill('Pending','amber');
+    return[o['Product Name'],o['Qty'],fmtDate(parseDate(o['Order Date'])),fmtDate(parseDate(o['Delivery Date'])),paid,inr(lineAmount(o,priceMap))];
   });
+  const table=renderTable(['Product','Qty','Order Date','Delivery Date','Payment','Amount'],rows,{emptyText:'No orders yet for this customer.'});
+  return summary+table;
+}
 
-  const order={'Overdue':0,'Remind Now':1,'Due This Week':2};
-  rows.sort((a,b)=>(order[a.status]??(3+a.daysToReminder))-(order[b.status]??(3+b.daysToReminder)));
-  return rows;
+let historyIdCounter=0;
+function toggleHistory(idx){
+  const row=document.getElementById('hist-'+idx);
+  const link=document.getElementById('hist-link-'+idx);
+  if(!row) return;
+  const nowOpen=row.classList.toggle('open');
+  if(link) link.textContent = nowOpen?'Hide History':'View History';
 }
 
 /* ===================== TAB: OPERATIONS ===================== */
+function computeReminderRows(customers,orders,priceMap){
+  const interval=parseInt(getSettingByKeyword('interval'))||15;
+  const loyalCustomers=customers.filter(isLoyalRow);
+  const rows=[];
+  loyalCustomers.forEach(c=>{
+    const name=c['Name'];
+    const custOrders=orders.filter(o=>o['Customer Name'].toLowerCase()===name.toLowerCase());
+    let lastOrderDate=null,lastProduct='';
+    custOrders.forEach(o=>{
+      const d=parseDate(o['Order Date']);
+      if(d&&(!lastOrderDate||d>lastOrderDate)){lastOrderDate=d;lastProduct=o['Product Name'];}
+    });
+    const totalRevenue=custOrders.reduce((s,o)=>s+lineAmount(o,priceMap),0);
+    let daysSince=null,status,statusType;
+    if(!lastOrderDate){status='No Orders Yet';statusType='amber';}
+    else{
+      daysSince=diffDays(lastOrderDate,today);
+      if(daysSince>=interval*2){status='Overdue';statusType='red';}
+      else if(daysSince>=interval){status='Due';statusType='amber';}
+      else{status='On Track';statusType='green';}
+    }
+    rows.push({name,phone:c['Phone'],lastOrderDate,daysSince,lastProduct,status,statusType,totalRevenue});
+  });
+  const rank={'Overdue':0,'No Orders Yet':1,'Due':2,'On Track':3};
+  rows.sort((a,b)=>(rank[a.status]-rank[b.status])||((b.daysSince||0)-(a.daysSince||0)));
+  return{rows,interval};
+}
+
+function renderReminderTracker(priceMap){
+  const{rows,interval}=computeReminderRows(DATA.customers,DATA.orders,priceMap);
+  if(rows.length===0) return{html:'<div class="empty">No loyal customers marked yet. Mark customers as Loyal in the Customers sheet.</div>',dueCount:0,overdueCount:0};
+
+  const headers=['Customer','Phone','Last Order','Days Since','Last Ordered','Lifetime Value','Status',''];
+  const thead='<tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr>';
+  const bodyRows=rows.map(r=>{
+    const idx=historyIdCounter++;
+    const daysDisplay=r.daysSince===null?'—':r.daysSince+'d';
+    const mainRow=`<tr>
+      <td data-label="Customer"><strong>${r.name}</strong></td>
+      <td data-label="Phone">${r.phone||'—'}</td>
+      <td data-label="Last Order">${r.lastOrderDate?fmtDate(r.lastOrderDate):'—'}</td>
+      <td data-label="Days Since">${daysDisplay}</td>
+      <td data-label="Last Ordered">${r.lastProduct||'—'}</td>
+      <td data-label="Lifetime Value">${inr(r.totalRevenue)}</td>
+      <td data-label="Status">${pill(r.status,r.statusType)}</td>
+      <td data-label="" class="no-label"><a class="view-history-link" id="hist-link-${idx}" onclick="toggleHistory(${idx})">View History</a></td>
+    </tr>`;
+    const detailRow=`<tr class="history-row" id="hist-${idx}"><td colspan="8" class="history-cell">${buildCustomerHistoryHTML(r.name,priceMap)}</td></tr>`;
+    return mainRow+detailRow;
+  }).join('');
+
+  const dueCount=rows.filter(r=>r.status==='Due'||r.status==='No Orders Yet').length;
+  const overdueCount=rows.filter(r=>r.status==='Overdue').length;
+
+  const html=`<div class="table-wrap"><table class="responsive-table"><thead>${thead}</thead><tbody>${bodyRows}</tbody></table></div>
+    <div class="interval-note">Check-in interval: every ${interval} days · overdue after ${interval*2} days (set in Settings sheet)</div>`;
+
+  return{html,dueCount,overdueCount};
+}
+
 function renderOperations(){
-  const {customers,products,orders,loyal}=DATA;
+  const{customers,products,orders}=DATA;
   const priceMap=buildPriceMap(products);
-  const rows=computeLoyaltyRows(loyal,orders);
+  const{html:trackerHTML,dueCount,overdueCount}=renderReminderTracker(priceMap);
 
-  const dueThisWeek=rows.filter(r=>r.status==='Due This Week'||r.status==='Remind Now').length;
-  const overdue=rows.filter(r=>r.status==='Overdue').length;
-
-  const pendingDel=orders.filter(o=>o['Order Date'] && o['Order Date'].trim() && (!o['Delivery Date']||!o['Delivery Date'].trim()));
+  const pendingDel=orders.filter(o=>o['Order Date']&&o['Order Date'].trim()&&(!o['Delivery Date']||!o['Delivery Date'].trim()));
   const pendingPay=orders.filter(o=>!o['Payment Date']||!o['Payment Date'].trim());
   const pendingPayTotal=pendingPay.reduce((s,o)=>s+lineAmount(o,priceMap),0);
 
-  const kpis=`<div class="cards-row">
-    <div class="kpi-card"><div class="kpi-label">Due This Week</div><div class="kpi-value">${dueThisWeek}</div><div class="kpi-sub">reminders to send</div></div>
-    <div class="kpi-card" style="border-left-color:var(--red)"><div class="kpi-label">Overdue</div><div class="kpi-value" style="color:var(--red)">${overdue}</div><div class="kpi-sub">no reorder yet</div></div>
-    <div class="kpi-card"><div class="kpi-label">Pending Deliveries</div><div class="kpi-value">${pendingDel.length}</div><div class="kpi-sub">not yet dispatched</div></div>
-    <div class="kpi-card" style="border-left-color:var(--red)"><div class="kpi-label">Pending Payments</div><div class="kpi-value" style="color:var(--red)">${pendingPay.length}</div><div class="kpi-sub">${inr(pendingPayTotal)} outstanding</div></div>
-  </div>`;
+  const kpis=kpiRow(
+    kpiCard('Due for Check-in',dueCount,{sub:'reach out this week'}),
+    kpiCard('Overdue',overdueCount,{color:'red',sub:'gone quiet'}),
+    kpiCard('Pending Deliveries',pendingDel.length,{sub:'not yet dispatched'}),
+    kpiCard('Pending Payments',pendingPay.length,{color:'red',sub:inr(pendingPayTotal)+' outstanding'})
+  );
 
-  const trackerHTML=rows.length===0?'<div class="empty">No loyal customers with order history yet.</div>':
-    `<div class="table-wrap"><table>
-      <thead><tr><th>Customer</th><th>Product</th><th>Usual Qty</th><th>Every</th><th>Last Order</th><th>Remind By</th><th>Status</th></tr></thead>
-      <tbody>${rows.map(r=>`<tr>
-        <td><strong>${r.cname}</strong></td><td>${r.prod}</td><td>${r.qty}</td><td>${r.freq}</td>
-        <td>${fmtDate(r.lastD)}</td><td>${fmtDate(r.reminderDate)}</td><td>${pill(r.status,r.statusType)}</td>
-      </tr>`).join('')}</tbody>
-    </table></div>`;
+  const delivRows=pendingDel.map(o=>[`<strong>${o['Customer Name']}</strong>`,o['Product Name'],o['Qty'],fmtDate(parseDate(o['Order Date']))]);
+  const delivHTML=renderTable(['Customer','Product','Qty','Order Date'],delivRows,{emptyText:'No pending deliveries.'});
 
-  const delivHTML=pendingDel.length===0?'<div class="empty">No pending deliveries.</div>':
-    `<div class="table-wrap"><table>
-      <thead><tr><th>Customer</th><th>Product</th><th>Qty</th><th>Order Date</th></tr></thead>
-      <tbody>${pendingDel.map(o=>`<tr><td><strong>${o['Customer Name']}</strong></td><td>${o['Product Name']}</td><td>${o['Qty']}</td><td>${fmtDate(parseDate(o['Order Date']))}</td></tr>`).join('')}</tbody>
-    </table></div>`;
-
-  const payHTML=pendingPay.length===0?'<div class="empty">No pending payments. 💚</div>':
-    `<div class="table-wrap"><table>
-      <thead><tr><th>Customer</th><th>Product</th><th>Qty</th><th>Order Date</th><th>Amount</th><th>Days Pending</th></tr></thead>
-      <tbody>${pendingPay.map(o=>{
-        const od=parseDate(o['Order Date']); const days=od?diffDays(od,today):'?'; const a=lineAmount(o,priceMap);
-        return`<tr><td><strong>${o['Customer Name']}</strong></td><td>${o['Product Name']}</td><td>${o['Qty']}</td>
-        <td>${fmtDate(od)}</td><td>${a>0?inr(a):'—'}</td><td style="color:${days>14?'var(--red)':'inherit'}">${days}d</td></tr>`;
-      }).join('')}</tbody>
-    </table><div class="pending-total">Total Pending: ${inr(pendingPayTotal)}</div></div>`;
+  const payRows=pendingPay.map(o=>{
+    const od=parseDate(o['Order Date']); const days=od?diffDays(od,today):'?'; const a=lineAmount(o,priceMap);
+    const daysHTML=(typeof days==='number'&&days>14)?`<span style="color:var(--red)">${days}d</span>`:days+'d';
+    return[`<strong>${o['Customer Name']}</strong>`,o['Product Name'],o['Qty'],fmtDate(od),a>0?inr(a):'—',daysHTML];
+  });
+  let payHTML=renderTable(['Customer','Product','Qty','Order Date','Amount','Days Pending'],payRows,{emptyText:'No pending payments. 💚'});
+  if(pendingPay.length>0) payHTML+=`<div class="pending-total">Total Pending: ${inr(pendingPayTotal)}</div>`;
 
   return `${kpis}
-    <div class="section"><div class="section-title">📲 Reorder Tracker <span class="badge">${rows.length} loyal</span></div>${trackerHTML}</div>
+    <div class="section"><div class="section-title">📞 Loyal Customer Check-ins <span class="badge">${overdueCount+dueCount} need attention</span></div>${trackerHTML}</div>
     <div class="section"><div class="section-title">📦 Pending Orders & Payments</div>
       <div class="pending-grid">
         <div><div class="sub-title">🚚 Pending Deliveries (${pendingDel.length})</div>${delivHTML}</div>
@@ -310,81 +394,84 @@ function renderOperations(){
 
 /* ===================== TAB: MIS ===================== */
 function renderMIS(){
-  const {orders,products,loyal,settings}=DATA;
+  const{orders,products,customers}=DATA;
   const priceMap=buildPriceMap(products);
-  const loyalSet=buildLoyalSet(loyal);
+  const loyalSet=new Set(customers.filter(isLoyalRow).map(c=>c['Name'].toLowerCase()));
 
-  const target=settings.find(s=>(s['Setting Name']||'').toLowerCase().includes('target'));
-  const targetVal=target?parseFloat(target['Value'])||0:0;
+  const targetVal=parseFloat(getSettingByKeyword('target'))||0;
 
-  const monthly={}; // key -> {revenue,profit,loyalRev,nonLoyalRev,orderIds:Set}
+  const monthly={};
   orders.forEach(o=>{
     const d=parseDate(o['Order Date']);
     if(!d) return;
     const key=monthKey(d);
     if(!monthly[key]) monthly[key]={revenue:0,profit:0,loyalRev:0,nonLoyalRev:0,orderIds:new Set()};
-    const amt=lineAmount(o,priceMap);
-    const prof=lineProfit(o,priceMap);
-    monthly[key].revenue+=amt;
-    monthly[key].profit+=prof;
+    const amt=lineAmount(o,priceMap), prof=lineProfit(o,priceMap);
+    monthly[key].revenue+=amt; monthly[key].profit+=prof;
     if(loyalSet.has((o['Customer Name']||'').toLowerCase())) monthly[key].loyalRev+=amt;
     else monthly[key].nonLoyalRev+=amt;
     if(o['Order Id']) monthly[key].orderIds.add(o['Order Id']);
   });
 
   const keys=Object.keys(monthly).sort().reverse();
-  const curKey=monthKey(today);
-  const cur=monthly[curKey];
-
+  const cur=monthly[monthKey(today)];
   const curAOV=cur&&cur.orderIds.size>0?cur.revenue/cur.orderIds.size:0;
   const curLoyalPct=cur&&cur.revenue>0?(cur.loyalRev/cur.revenue)*100:0;
   const curNonLoyalPct=cur&&cur.revenue>0?(cur.nonLoyalRev/cur.revenue)*100:0;
 
-  const kpis=`<div class="cards-row">
-    <div class="kpi-card"><div class="kpi-label">Target Monthly Profit</div><div class="kpi-value">${targetVal>0?inr(targetVal):'—'}</div><div class="kpi-sub">set in Settings sheet</div></div>
-    <div class="kpi-card"><div class="kpi-label">Avg Order Value</div><div class="kpi-value">${cur?inr(curAOV):'—'}</div><div class="kpi-sub">this month</div></div>
-    <div class="kpi-card"><div class="kpi-label">Revenue Split</div><div class="kpi-value" style="font-size:1.1rem">${pct(curLoyalPct)} Loyal</div><div class="kpi-sub">${pct(curNonLoyalPct)} non-loyal</div></div>
-  </div>`;
+  const kpis=kpiRow(
+    kpiCard('Target Monthly Profit',targetVal>0?inr(targetVal):'—',{sub:'set in Settings sheet'}),
+    kpiCard('Avg Order Value',cur?inr(curAOV):'—',{sub:'this month'}),
+    kpiCard('Revenue Split','',{sub:`${pct(curLoyalPct)} loyal · ${pct(curNonLoyalPct)} others`})
+  );
 
-  const trendHTML=keys.length===0?'<div class="empty">No order data yet to build monthly trends.</div>':
-    `<div class="table-wrap"><table>
-      <thead><tr><th>Month</th><th>Actual Profit</th><th>Avg Order Value</th><th>Loyal Revenue %</th><th>Non-Loyal Revenue %</th></tr></thead>
-      <tbody>${keys.map(k=>{
-        const m=monthly[k];
-        const aov=m.orderIds.size>0?m.revenue/m.orderIds.size:0;
-        const lp=m.revenue>0?(m.loyalRev/m.revenue)*100:0;
-        const nlp=m.revenue>0?(m.nonLoyalRev/m.revenue)*100:0;
-        return `<tr><td><strong>${monthLabel(k)}</strong></td><td>${inr(m.profit)}</td><td>${inr(aov)}</td><td>${pct(lp)}</td><td>${pct(nlp)}</td></tr>`;
-      }).join('')}</tbody>
-    </table></div>`;
+  const trendRows=keys.map(k=>{
+    const m=monthly[k];
+    const aov=m.orderIds.size>0?m.revenue/m.orderIds.size:0;
+    const lp=m.revenue>0?(m.loyalRev/m.revenue)*100:0;
+    const nlp=m.revenue>0?(m.nonLoyalRev/m.revenue)*100:0;
+    return[`<strong>${monthLabel(k)}</strong>`,inr(m.profit),inr(aov),pct(lp),pct(nlp)];
+  });
+  const trendHTML=renderTable(['Month','Actual Profit','Avg Order Value','Loyal Revenue %','Non-Loyal Revenue %'],trendRows,{emptyText:'No order data yet to build monthly trends.'});
 
-  return `${kpis}
-    <div class="section"><div class="section-title">📈 Monthly Trend</div>${trendHTML}</div>`;
+  return `${kpis}<div class="section"><div class="section-title">📈 Monthly Trend</div>${trendHTML}</div>`;
 }
 
 /* ===================== TAB: CUSTOMERS ===================== */
 function renderCustomers(){
-  const {customers,orders}=DATA;
+  const{customers,orders}=DATA;
   const cutoff=new Date(today); cutoff.setDate(cutoff.getDate()-60);
   const activeSet=new Set(orders.filter(o=>{const d=parseDate(o['Order Date']);return d&&d>=cutoff;}).map(o=>o['Customer Name'].toLowerCase()));
+  const loyalCount=customers.filter(isLoyalRow).length;
 
-  const kpis=`<div class="cards-row">
-    <div class="kpi-card"><div class="kpi-label">Total Customers</div><div class="kpi-value">${customers.length}</div></div>
-    <div class="kpi-card" style="border-left-color:var(--green)"><div class="kpi-label">Active (60 days)</div><div class="kpi-value" style="color:var(--green)">${activeSet.size}</div></div>
+  const kpis=kpiRow(
+    kpiCard('Total Customers',customers.length),
+    kpiCard('Loyal Customers',loyalCount,{color:'gold'}),
+    kpiCard('Active (60 days)',activeSet.size,{color:'green'})
+  );
+
+  return `${kpis}<div class="section"><div class="section-title">👥 All Customers</div>
+    <div class="filter-pills">
+      <button class="filter-pill active" data-filter="all" onclick="filterCustomersTable('all')">All</button>
+      <button class="filter-pill" data-filter="loyal" onclick="filterCustomersTable('loyal')">Loyal</button>
+      <button class="filter-pill" data-filter="others" onclick="filterCustomersTable('others')">Others</button>
+    </div>
+    <div id="customersResults"></div>
   </div>`;
-
-  const tableHTML=customers.length===0?'<div class="empty">No customers added yet.</div>':
-    `<div class="table-wrap"><table>
-      <thead><tr><th>Sr No</th><th>Name</th><th>Address</th><th>City</th><th>Phone</th><th>Notes</th></tr></thead>
-      <tbody>${customers.map(c=>`<tr><td>${c['Sr No']}</td><td><strong>${c['Name']}</strong></td><td>${c['Address']}</td><td>${c['City']}</td><td>${c['Phone']}</td><td>${c['Notes']}</td></tr>`).join('')}</tbody>
-    </table></div>`;
-
-  return `${kpis}<div class="section"><div class="section-title">👥 All Customers</div>${tableHTML}</div>`;
+}
+function filterCustomersTable(filter){
+  document.querySelectorAll('.filter-pill').forEach(b=>b.classList.toggle('active',b.dataset.filter===filter));
+  let list=DATA.customers;
+  if(filter==='loyal') list=list.filter(isLoyalRow);
+  if(filter==='others') list=list.filter(c=>!isLoyalRow(c));
+  const rows=list.map(c=>[c['Sr No'],`<strong>${c['Name']}</strong>`,c['Address'],c['City'],c['Phone'],isLoyalRow(c)?pill('Loyal','green'):'—',c['Notes']]);
+  const resultsEl=document.getElementById('customersResults');
+  if(resultsEl) resultsEl.innerHTML=renderTable(['Sr No','Name','Address','City','Phone','Loyal','Notes'],rows,{emptyText:'No customers in this filter.'});
 }
 
 /* ===================== TAB: PRODUCTS ===================== */
 function renderProducts(){
-  const {products,orders}=DATA;
+  const{products,orders}=DATA;
   const priceMap=buildPriceMap(products);
   const monthStart=new Date(today.getFullYear(),today.getMonth(),1);
 
@@ -392,51 +479,76 @@ function renderProducts(){
   orders.forEach(o=>{
     const d=parseDate(o['Order Date']);
     if(!d||d<monthStart) return;
-    const name=o['Product Name'];
-    revByProduct[name]=(revByProduct[name]||0)+lineAmount(o,priceMap);
+    revByProduct[o['Product Name']]=(revByProduct[o['Product Name']]||0)+lineAmount(o,priceMap);
   });
   let topProduct='—',topVal=0;
-  Object.entries(revByProduct).forEach(([name,val])=>{ if(val>topVal){topVal=val;topProduct=name;} });
+  Object.entries(revByProduct).forEach(([name,val])=>{if(val>topVal){topVal=val;topProduct=name;}});
 
-  const kpis=`<div class="cards-row">
-    <div class="kpi-card"><div class="kpi-label">Total Products</div><div class="kpi-value">${products.length}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Top Seller This Month</div><div class="kpi-value" style="font-size:1.15rem">${topProduct}</div><div class="kpi-sub">${topVal>0?inr(topVal)+' revenue':'no sales yet'}</div></div>
-  </div>`;
+  const kpis=kpiRow(
+    kpiCard('Total Products',products.length),
+    kpiCard('Top Seller This Month',topProduct,{sub:topVal>0?inr(topVal)+' revenue':'no sales yet'})
+  );
 
-  const tableHTML=products.length===0?'<div class="empty">No products added yet.</div>':
-    `<div class="table-wrap"><table>
-      <thead><tr><th>Sr No</th><th>Category</th><th>Name</th><th>Pack Size</th><th>Price</th><th>Margin %</th><th>Seasonal</th><th>Notes</th></tr></thead>
-      <tbody>${products.map(p=>`<tr><td>${p['Sr No']}</td><td>${p['Category']}</td><td><strong>${p['Name']}</strong></td><td>${p['Pack Size']}</td><td>${p['Price']?inr(parseFloat(p['Price'])):'—'}</td><td>${p['Margin %']||'—'}</td><td>${p['Seasonal']}</td><td>${p['Notes']}</td></tr>`).join('')}</tbody>
-    </table></div>`;
+  const rows=products.map(p=>[p['Sr No'],p['Category'],`<strong>${p['Name']}</strong>`,p['Pack Size'],p['Price']?inr(parseFloat(p['Price'])):'—',p['Margin %']||'—',p['Seasonal'],p['Notes']]);
+  const tableHTML=renderTable(['Sr No','Category','Name','Pack Size','Price','Margin %','Seasonal','Notes'],rows,{emptyText:'No products added yet.'});
 
   return `${kpis}<div class="section"><div class="section-title">🧂 All Products</div>${tableHTML}</div>`;
 }
 
-/* ===================== TAB: LOYAL CUSTOMERS ===================== */
-function renderLoyal(){
-  const {loyal,orders}=DATA;
-  const rows=computeLoyaltyRows(loyal,orders);
-  const distinctCustomers=new Set(loyal.map(l=>l['Customer Name'].toLowerCase()).filter(Boolean)).size;
-  const onTrack=rows.filter(r=>r.statusType==='green').length;
-  const needsAttention=rows.filter(r=>r.statusType!=='green').length;
+/* ===================== TAB: ORDER HISTORY ===================== */
+function renderOrderHistoryTab(){
+  const{customers,products}=DATA;
+  const custOptions=['<option value="">All Customers</option>'].concat(
+    customers.map(c=>`<option value="${c['Name']}">${c['Name']}</option>`)).join('');
+  const prodOptions=['<option value="">All Products</option>'].concat(
+    products.map(p=>`<option value="${p['Name']}">${p['Name']}</option>`)).join('');
 
-  const kpis=`<div class="cards-row">
-    <div class="kpi-card"><div class="kpi-label">Distinct Loyal Customers</div><div class="kpi-value">${distinctCustomers}</div></div>
-    <div class="kpi-card" style="border-left-color:var(--green)"><div class="kpi-label">On Track</div><div class="kpi-value" style="color:var(--green)">${onTrack}</div></div>
-    <div class="kpi-card" style="border-left-color:var(--amber)"><div class="kpi-label">Needs Attention</div><div class="kpi-value" style="color:var(--amber)">${needsAttention}</div></div>
+  return `<div class="section"><div class="section-title">🧾 Order History</div>
+    <div class="filter-row">
+      <select id="ohCustomer" onchange="renderOrderHistoryResults()">${custOptions}</select>
+      <select id="ohProduct" onchange="renderOrderHistoryResults()">${prodOptions}</select>
+    </div>
+    <div id="orderHistoryResults"></div>
   </div>`;
+}
+function renderOrderHistoryResults(){
+  const priceMap=buildPriceMap(DATA.products);
+  const custSel=document.getElementById('ohCustomer');
+  const prodSel=document.getElementById('ohProduct');
+  const cust=custSel?custSel.value:'';
+  const prod=prodSel?prodSel.value:'';
 
-  const tableHTML=rows.length===0?'<div class="empty">No loyal customers with order history yet.</div>':
-    `<div class="table-wrap"><table>
-      <thead><tr><th>Sr No</th><th>Customer</th><th>Product Loved</th><th>Qty</th><th>Usage Freq</th><th>Notes</th><th>Status</th></tr></thead>
-      <tbody>${rows.map(r=>`<tr><td>${r.srNo||''}</td><td><strong>${r.cname}</strong></td><td>${r.prod}</td><td>${r.qty}</td><td>${r.freq}</td><td>${r.notes}</td><td>${pill(r.status,r.statusType)}</td></tr>`).join('')}</tbody>
-    </table></div>`;
+  let orders=DATA.orders.filter(o=>
+    (!cust||o['Customer Name'].toLowerCase()===cust.toLowerCase()) &&
+    (!prod||o['Product Name'].toLowerCase()===prod.toLowerCase())
+  );
+  orders.sort((a,b)=>{
+    const da=parseDate(a['Order Date']),db=parseDate(b['Order Date']);
+    return(db?db.getTime():0)-(da?da.getTime():0);
+  });
 
-  return `${kpis}<div class="section"><div class="section-title">🫙 Loyal Customers — Master List</div>${tableHTML}</div>`;
+  let summaryHTML='';
+  if(cust){
+    const totalRevenue=orders.reduce((s,o)=>s+lineAmount(o,priceMap),0);
+    const lastDate=orders.length?parseDate(orders[0]['Order Date']):null;
+    summaryHTML=`<div class="history-summary">
+      <div><span class="hs-label">Total Orders</span><span class="hs-value">${orders.length}</span></div>
+      <div><span class="hs-label">Total Revenue</span><span class="hs-value">${inr(totalRevenue)}</span></div>
+      <div><span class="hs-label">Last Order</span><span class="hs-value">${lastDate?fmtDate(lastDate):'—'}</span></div>
+    </div>`;
+  }
+
+  const rows=orders.map(o=>{
+    const paid=(o['Payment Date']&&o['Payment Date'].trim())?pill('Paid','green'):pill('Pending','amber');
+    return[`<strong>${o['Customer Name']}</strong>`,o['Product Name'],o['Qty'],fmtDate(parseDate(o['Order Date'])),fmtDate(parseDate(o['Delivery Date'])),paid,inr(lineAmount(o,priceMap))];
+  });
+  const tableHTML=renderTable(['Customer','Product','Qty','Order Date','Delivery Date','Payment','Amount'],rows,{emptyText:'No orders match this filter.'});
+
+  const resultsEl=document.getElementById('orderHistoryResults');
+  if(resultsEl) resultsEl.innerHTML=summaryHTML+tableHTML;
 }
 
 /* ===================== TAB SWITCHING ===================== */
-const RENDERERS={operations:renderOperations,mis:renderMIS,customers:renderCustomers,products:renderProducts,loyal:renderLoyal};
 function switchTab(tab){
   document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
   document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+tab));
@@ -449,32 +561,35 @@ async function init(){
   btn.disabled=true; btn.textContent='⟳ Loading…';
   document.getElementById('today-date').textContent=today.toLocaleDateString('en-IN',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
   app.innerHTML='<div class="loading"><div class="spinner"></div>Fetching latest data…</div>';
+  historyIdCounter=0;
 
   try{
-    const[customers,products,orders,loyal,settings]=await Promise.all([
+    const[customers,products,orders,settings]=await Promise.all([
       fetchCSV(SHEET_TABS.customers),
       fetchCSV(SHEET_TABS.products),
       fetchCSV(SHEET_TABS.orders),
-      fetchCSV(SHEET_TABS.loyal),
-      fetchCSV(SHEET_TABS.settings).catch(()=>[]) // settings optional until gid is set
+      fetchCSV(SHEET_TABS.settings).catch(()=>[])
     ]);
-    DATA={customers,products,orders,loyal,settings};
+    DATA={customers,products,orders,settings};
 
     document.getElementById('last-updated').textContent='Last refreshed: '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
 
-    let opsHTML, misHTML, custHTML, prodHTML, loyalHTML;
-    try { opsHTML = renderOperations(); } catch(err) { opsHTML = '<div class="error-msg">Operations render error: '+err.message+'</div>'; }
-    try { misHTML = renderMIS(); } catch(err) { misHTML = '<div class="error-msg">MIS render error: '+err.message+'</div>'; }
-    try { custHTML = renderCustomers(); } catch(err) { custHTML = '<div class="error-msg">Customers render error: '+err.message+'</div>'; }
-    try { prodHTML = renderProducts(); } catch(err) { prodHTML = '<div class="error-msg">Products render error: '+err.message+'</div>'; }
-    try { loyalHTML = renderLoyal(); } catch(err) { loyalHTML = '<div class="error-msg">Loyal render error: '+err.message+'</div>'; }
+    let opsHTML,misHTML,custHTML,prodHTML,histHTML;
+    try{opsHTML=renderOperations();}catch(e){opsHTML='<div class="error-msg">Operations error: '+e.message+'</div>';}
+    try{misHTML=renderMIS();}catch(e){misHTML='<div class="error-msg">MIS error: '+e.message+'</div>';}
+    try{custHTML=renderCustomers();}catch(e){custHTML='<div class="error-msg">Customers error: '+e.message+'</div>';}
+    try{prodHTML=renderProducts();}catch(e){prodHTML='<div class="error-msg">Products error: '+e.message+'</div>';}
+    try{histHTML=renderOrderHistoryTab();}catch(e){histHTML='<div class="error-msg">Order History error: '+e.message+'</div>';}
 
     app.innerHTML=`
       <div class="panel active" id="panel-operations">${opsHTML}</div>
       <div class="panel" id="panel-mis">${misHTML}</div>
       <div class="panel" id="panel-customers">${custHTML}</div>
       <div class="panel" id="panel-products">${prodHTML}</div>
-      <div class="panel" id="panel-loyal">${loyalHTML}</div>`;
+      <div class="panel" id="panel-history">${histHTML}</div>`;
+
+    filterCustomersTable('all');
+    renderOrderHistoryResults();
   }catch(e){
     app.innerHTML=`<div class="error-msg">⚠️ Could not load data. Check your internet connection and that the Google Sheet is published to web.<br><small>${e.message}</small></div>`;
     document.getElementById('last-updated').textContent='Failed to load';
