@@ -108,6 +108,10 @@
     padding:10px 13px;font-size:0.82rem;color:var(--ink);white-space:pre-wrap;line-height:1.5;}
   .basket-value{background:var(--gold-light);color:var(--gold);font-size:0.68rem;font-weight:700;
     padding:3px 11px;border-radius:20px;}
+  .profile-tabs{margin-top:4px;}
+  .profile-tabs .filter-pill{padding:6px 12px;font-size:0.7rem;}
+  .profile-panel{display:none;}
+  .profile-panel.active{display:block;}
 
   @media(max-width:700px){
     .pending-grid{grid-template-columns:1fr;}
@@ -290,7 +294,21 @@ function taskStatusPill(t){
 }
 
 /* ===================== CUSTOMER 360 PROFILE (shared) ===================== */
-function buildCustomerProfileHTML(name,priceMap){
+function computeCustomerMonthly(name,priceMap){
+  const custOrders=DATA.orders.filter(o=>o['Customer Name'].toLowerCase()===name.toLowerCase());
+  const monthly={};
+  custOrders.forEach(o=>{
+    const d=parseDate(o['Order Date']);
+    if(!d) return;
+    const key=monthKey(d);
+    if(!monthly[key]) monthly[key]={key,revenue:0,orders:[]};
+    monthly[key].revenue+=lineAmount(o,priceMap);
+    monthly[key].orders.push(o);
+  });
+  return Object.values(monthly).sort((a,b)=>b.key.localeCompare(a.key));
+}
+
+function buildCustomerProfileHTML(name,priceMap,outerIdx){
   const customer=DATA.customers.find(c=>c['Name'].toLowerCase()===name.toLowerCase());
   const notes=customer?(customer['Notes']||'').trim():'';
 
@@ -322,13 +340,54 @@ function buildCustomerProfileHTML(name,priceMap){
   const taskRows=custTasks.map(t=>[t['Task'],t['Owner'],t['Due Date']?fmtDate(parseDate(t['Due Date'])):'—',taskStatusPill(t)]);
   const taskTable=renderTable(['Task','Owner','Due Date','Status'],taskRows,{emptyText:'No tasks for this customer.'});
 
+  const monthly=computeCustomerMonthly(name,priceMap);
+  const last3=monthly.slice(0,3);
+  const last3Total=last3.reduce((s,m)=>s+m.revenue,0);
+  const last3Sub=last3.length?last3.map(m=>monthLabelShort(m.key)+': '+inr(m.revenue)).join(' · '):'no recent orders';
+
+  const activityRows=last3.map(m=>{
+    const idx=historyIdCounter++;
+    const mRows=m.orders.map(o=>{
+      const paid=(o['Payment Date']&&o['Payment Date'].trim())?pill('Paid','green'):pill('Pending','amber');
+      return[o['Order Id']||'—',o['Product Name'],o['Qty'],fmtDate(parseDate(o['Order Date'])),paid,inr(lineAmount(o,priceMap))];
+    });
+    const mTable=renderTable(['Order Id','Product','Qty','Order Date','Payment','Amount'],mRows,{emptyText:'No orders.'});
+    return `<tr>
+      <td data-label="Month"><strong>${monthLabel(m.key)}</strong></td>
+      <td data-label="Revenue">${inr(m.revenue)}</td>
+      <td data-label="" class="no-label"><a class="view-history-link" id="hist-link-${idx}" data-label="View Orders" onclick="toggleHistory(${idx})">View Orders</a></td>
+    </tr><tr class="history-row" id="hist-${idx}"><td colspan="3" class="history-cell">${mTable}</td></tr>`;
+  }).join('');
+  const activityHTML=last3.length===0?'<div class="empty">No recent orders.</div>':
+    `<div class="table-wrap"><table class="responsive-table"><thead><tr><th>Month</th><th>Revenue</th><th></th></tr></thead><tbody>${activityRows}</tbody></table></div>`;
+
+  const summaryCards=kpiRow(
+    kpiCard('Basket Value',inr(basketValue),{sub:'per month'}),
+    kpiCard('Last 3 Months',inr(last3Total),{sub:last3Sub}),
+    kpiCard('Lifetime Value',inr(totalRevenue),{sub:totalOrders+' orders total'})
+  );
+
   return `
-    <div class="profile-section"><div class="profile-section-title">📝 Notes</div>
-      <div class="profile-notes">${notes||'<span class="empty">No notes yet.</span>'}</div></div>
-    <div class="profile-section"><div class="profile-section-title">🧺 Preferred Basket <span class="basket-value">${inr(basketValue)}/month</span></div>${basketTable}</div>
-    <div class="profile-section"><div class="profile-section-title">🧾 Order History</div>${orderSummary}${orderTable}</div>
-    <div class="profile-section"><div class="profile-section-title">✅ Tasks</div>${taskTable}</div>
+    ${summaryCards}
+    <div class="filter-pills profile-tabs" id="ptabs-${outerIdx}">
+      <button class="filter-pill ptab-btn active" data-ptab="profile" onclick="switchProfileTab(${outerIdx},'profile')">📝 Profile / Preferences</button>
+      <button class="filter-pill ptab-btn" data-ptab="basket" onclick="switchProfileTab(${outerIdx},'basket')">🧺 Basket</button>
+      <button class="filter-pill ptab-btn" data-ptab="activity" onclick="switchProfileTab(${outerIdx},'activity')">📈 Recent Activity</button>
+      <button class="filter-pill ptab-btn" data-ptab="orders" onclick="switchProfileTab(${outerIdx},'orders')">🧾 Order History</button>
+      <button class="filter-pill ptab-btn" data-ptab="tasks" onclick="switchProfileTab(${outerIdx},'tasks')">✅ Tasks</button>
+    </div>
+    <div id="ppanels-${outerIdx}">
+      <div class="profile-panel active" data-ptab="profile"><div class="profile-notes">${notes||'<span class="empty">No profile notes yet.</span>'}</div></div>
+      <div class="profile-panel" data-ptab="basket">${basketTable}</div>
+      <div class="profile-panel" data-ptab="activity">${activityHTML}</div>
+      <div class="profile-panel" data-ptab="orders">${orderSummary}${orderTable}</div>
+      <div class="profile-panel" data-ptab="tasks">${taskTable}</div>
+    </div>
   `;
+}
+function switchProfileTab(outerIdx,tab){
+  document.querySelectorAll(`#ptabs-${outerIdx} .ptab-btn`).forEach(b=>b.classList.toggle('active',b.dataset.ptab===tab));
+  document.querySelectorAll(`#ppanels-${outerIdx} .profile-panel`).forEach(p=>p.classList.toggle('active',p.dataset.ptab===tab));
 }
 
 let historyIdCounter=0;
@@ -387,7 +446,7 @@ function renderReminderTracker(priceMap){
       <td data-label="Status">${pill(r.status,r.statusType)}</td>
       <td data-label="" class="no-label"><a class="view-history-link" id="hist-link-${idx}" data-label="View Profile" onclick="toggleHistory(${idx})">View Profile</a></td>
     </tr>`;
-    const detailRow=`<tr class="history-row" id="hist-${idx}"><td colspan="7" class="history-cell">${buildCustomerProfileHTML(r.name,priceMap)}</td></tr>`;
+    const detailRow=`<tr class="history-row" id="hist-${idx}"><td colspan="7" class="history-cell">${buildCustomerProfileHTML(r.name,priceMap,idx)}</td></tr>`;
     return mainRow+detailRow;
   }).join('');
 
