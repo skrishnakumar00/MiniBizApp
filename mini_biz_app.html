@@ -230,18 +230,31 @@ async function fetchCSV(rawUrl){
   return parseCSV(text);
 }
 function parseCSV(text){
-  const lines=text.trim().split('\n');
-  const headers=lines[0].split(',').map(h=>h.trim().replace(/^"|"$/g,''));
-  return lines.slice(1).filter(l=>l.trim()).map(line=>{
-    const vals=[]; let cur='',inQ=false;
-    for(const ch of line){
-      if(ch==='"'){inQ=!inQ;}
-      else if(ch===','&&!inQ){vals.push(cur.trim());cur='';}
-      else cur+=ch;
+  const rows=[];
+  let row=[],field='',inQuotes=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(inQuotes){
+      if(ch==='"'){
+        if(text[i+1]==='"'){ field+='"'; i++; }
+        else{ inQuotes=false; }
+      } else { field+=ch; }
+    } else {
+      if(ch==='"'){ inQuotes=true; }
+      else if(ch===','){ row.push(field); field=''; }
+      else if(ch==='\r'){ /* skip, \n handles the break */ }
+      else if(ch==='\n'){ row.push(field); field=''; rows.push(row); row=[]; }
+      else{ field+=ch; }
     }
-    vals.push(cur.trim());
+  }
+  if(field.length>0||row.length>0){ row.push(field); rows.push(row); }
+
+  const nonEmpty=rows.filter(r=>r.some(c=>c.trim()!==''));
+  if(nonEmpty.length===0) return [];
+  const headers=nonEmpty[0].map(h=>h.trim());
+  return nonEmpty.slice(1).map(cols=>{
     const obj={};
-    headers.forEach((h,i)=>obj[h]=(vals[i]||'').replace(/^"|"$/g,'').trim());
+    headers.forEach((h,i)=>obj[h]=(cols[i]||'').trim());
     return obj;
   });
 }
@@ -336,14 +349,12 @@ function buildCustomerProfileHTML(name,priceMap,outerIdx){
   });
   const orderTable=renderTable(['Order Id','Product','Qty','Order Date','Delivery Date','Payment','Amount'],orderRows,{emptyText:'No orders yet for this customer.'});
 
-  const custTasks=(DATA.tasks||[]).filter(t=>(t['Related Customer']||'').toLowerCase()===name.toLowerCase());
+  const custTasks=(DATA.tasks||[]).filter(t=>(t['Related Customer']||'').toLowerCase()===name.toLowerCase()&&!isTaskDone(t));
   const taskRows=custTasks.map(t=>[t['Task'],t['Owner'],t['Due Date']?fmtDate(parseDate(t['Due Date'])):'—',taskStatusPill(t)]);
-  const taskTable=renderTable(['Task','Owner','Due Date','Status'],taskRows,{emptyText:'No tasks for this customer.'});
+  const taskTable=renderTable(['Task','Owner','Due Date','Status'],taskRows,{emptyText:'No pending tasks for this customer.'});
 
   const monthly=computeCustomerMonthly(name,priceMap);
   const last3=monthly.slice(0,3);
-  const last3Total=last3.reduce((s,m)=>s+m.revenue,0);
-  const last3Sub=last3.length?last3.map(m=>monthLabelShort(m.key)+': '+inr(m.revenue)).join(' · '):'no recent orders';
 
   const activityRows=last3.map(m=>{
     const idx=historyIdCounter++;
@@ -361,14 +372,7 @@ function buildCustomerProfileHTML(name,priceMap,outerIdx){
   const activityHTML=last3.length===0?'<div class="empty">No recent orders.</div>':
     `<div class="table-wrap"><table class="responsive-table"><thead><tr><th>Month</th><th>Revenue</th><th></th></tr></thead><tbody>${activityRows}</tbody></table></div>`;
 
-  const summaryCards=kpiRow(
-    kpiCard('Basket Value',inr(basketValue),{sub:'per month'}),
-    kpiCard('Last 3 Months',inr(last3Total),{sub:last3Sub}),
-    kpiCard('Lifetime Value',inr(totalRevenue),{sub:totalOrders+' orders total'})
-  );
-
   return `
-    ${summaryCards}
     <div class="filter-pills profile-tabs" id="ptabs-${outerIdx}">
       <button class="filter-pill ptab-btn active" data-ptab="profile" onclick="switchProfileTab(${outerIdx},'profile')">📝 Profile / Preferences</button>
       <button class="filter-pill ptab-btn" data-ptab="basket" onclick="switchProfileTab(${outerIdx},'basket')">🧺 Basket</button>
@@ -400,6 +404,10 @@ function toggleHistory(idx){
 }
 
 /* ===================== TAB: OPERATIONS ===================== */
+function isTaskDone(t){
+  const s=(t['Status']||'').toLowerCase();
+  return s.includes('done')||s.includes('complete');
+}
 function computeReminderRows(customers,orders,priceMap){
   const interval=parseInt(getSettingByKeyword('interval'))||15;
   const loyalCustomers=customers.filter(isLoyalRow);
@@ -421,7 +429,16 @@ function computeReminderRows(customers,orders,priceMap){
       else if(daysSince>=interval){status='Due';statusType='amber';}
       else{status='On Track';statusType='green';}
     }
-    rows.push({name,phone:c['Phone'],lastOrderDate,daysSince,status,statusType,totalRevenue});
+
+    const basketItems=(DATA.basket||[]).filter(b=>b['Customer Name'].toLowerCase()===name.toLowerCase());
+    const basketValue=basketItems.reduce((s,b)=>s+basketLineValue(b,priceMap),0);
+
+    const last3=computeCustomerMonthly(name,priceMap).slice(0,3);
+    const last3MonthsValue=last3.reduce((s,m)=>s+m.revenue,0);
+
+    const pendingTaskCount=(DATA.tasks||[]).filter(t=>(t['Related Customer']||'').toLowerCase()===name.toLowerCase()&&!isTaskDone(t)).length;
+
+    rows.push({name,lastOrderDate,daysSince,status,statusType,totalRevenue,basketValue,last3MonthsValue,pendingTaskCount});
   });
   const rank={'Overdue':0,'No Orders Yet':1,'Due':2,'On Track':3};
   rows.sort((a,b)=>(rank[a.status]-rank[b.status])||((b.daysSince||0)-(a.daysSince||0)));
@@ -432,21 +449,24 @@ function renderReminderTracker(priceMap){
   const{rows,interval}=computeReminderRows(DATA.customers,DATA.orders,priceMap);
   if(rows.length===0) return{html:'<div class="empty">No loyal customers marked yet. Mark customers as Loyal in the Customers sheet.</div>',dueCount:0,overdueCount:0};
 
-  const headers=['Customer','Phone','Last Order','Days Since','Lifetime Value','Status',''];
+  const headers=['Customer','Status','Tasks','Days Since','Last Order','Basket Value','Last 3 Months','Lifetime Value',''];
   const thead='<tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr>';
   const bodyRows=rows.map(r=>{
     const idx=historyIdCounter++;
     const daysDisplay=r.daysSince===null?'—':r.daysSince+'d';
+    const tasksDisplay=r.pendingTaskCount>0?pill(String(r.pendingTaskCount),'amber'):'—';
     const mainRow=`<tr>
       <td data-label="Customer"><strong>${r.name}</strong></td>
-      <td data-label="Phone">${r.phone||'—'}</td>
-      <td data-label="Last Order">${r.lastOrderDate?fmtDate(r.lastOrderDate):'—'}</td>
-      <td data-label="Days Since">${daysDisplay}</td>
-      <td data-label="Lifetime Value">${inr(r.totalRevenue)}</td>
       <td data-label="Status">${pill(r.status,r.statusType)}</td>
+      <td data-label="Tasks">${tasksDisplay}</td>
+      <td data-label="Days Since">${daysDisplay}</td>
+      <td data-label="Last Order">${r.lastOrderDate?fmtDate(r.lastOrderDate):'—'}</td>
+      <td data-label="Basket Value">${inr(r.basketValue)}</td>
+      <td data-label="Last 3 Months">${inr(r.last3MonthsValue)}</td>
+      <td data-label="Lifetime Value">${inr(r.totalRevenue)}</td>
       <td data-label="" class="no-label"><a class="view-history-link" id="hist-link-${idx}" data-label="View Profile" onclick="toggleHistory(${idx})">View Profile</a></td>
     </tr>`;
-    const detailRow=`<tr class="history-row" id="hist-${idx}"><td colspan="7" class="history-cell">${buildCustomerProfileHTML(r.name,priceMap,idx)}</td></tr>`;
+    const detailRow=`<tr class="history-row" id="hist-${idx}"><td colspan="9" class="history-cell">${buildCustomerProfileHTML(r.name,priceMap,idx)}</td></tr>`;
     return mainRow+detailRow;
   }).join('');
 
@@ -468,12 +488,20 @@ function renderOperations(){
   const pendingPay=orders.filter(o=>!o['Payment Date']||!o['Payment Date'].trim());
   const pendingPayTotal=pendingPay.reduce((s,o)=>s+lineAmount(o,priceMap),0);
 
+  const loyalCount=customers.filter(isLoyalRow).length;
+  const targetProfit=parseFloat(getSettingByKeyword('target'))||0;
+  const targetRevenue=targetProfit*2;
+  const loyalExpectedRevenue=targetRevenue*0.8;
+  const perLoyalCustomer=loyalCount>0?loyalExpectedRevenue/loyalCount:0;
+
   const kpis=kpiRow(
     kpiCard('Due for Check-in',dueCount,{sub:'reach out this week'}),
     kpiCard('Overdue',overdueCount,{color:'red',sub:'gone quiet'}),
-    kpiCard('Pending Deliveries',pendingDel.length,{sub:'not yet dispatched'}),
-    kpiCard('Pending Payments',pendingPay.length,{color:'red',sub:inr(pendingPayTotal)+' outstanding'})
+    kpiCard('Target Monthly Profit',targetProfit>0?inr(targetProfit):'—'),
+    kpiCard('Target Monthly Revenue',targetRevenue>0?inr(targetRevenue):'—',{sub:targetRevenue>0?`${inr(loyalExpectedRevenue)} (80%) expected from loyal customers`:''}),
+    kpiCard('Expected per Loyal Customer',perLoyalCustomer>0?inr(perLoyalCustomer):'—',{sub:`across ${loyalCount} loyal customer${loyalCount===1?'':'s'}`})
   );
+  const footnote=`<div class="interval-note">Target Monthly Revenue = 2× Target Monthly Profit (assumes ~50% margin). Expected per Loyal Customer = 80% of Target Revenue ÷ number of loyal customers.</div>`;
 
   const delivRows=pendingDel.map(o=>[`<strong>${o['Customer Name']}</strong>`,o['Product Name'],o['Qty'],fmtDate(parseDate(o['Order Date']))]);
   const delivHTML=renderTable(['Customer','Product','Qty','Order Date'],delivRows,{emptyText:'No pending deliveries.'});
@@ -486,7 +514,7 @@ function renderOperations(){
   let payHTML=renderTable(['Customer','Product','Qty','Order Date','Amount','Days Pending'],payRows,{emptyText:'No pending payments. 💚'});
   if(pendingPay.length>0) payHTML+=`<div class="pending-total">Total Pending: ${inr(pendingPayTotal)}</div>`;
 
-  return `${kpis}
+  return `${kpis}${footnote}
     <div class="section"><div class="section-title">📞 Loyal Customer Check-ins <span class="badge">${overdueCount+dueCount} need attention</span></div>${trackerHTML}</div>
     <div class="section"><div class="section-title">📦 Pending Orders & Payments</div>
       <div class="pending-grid">
@@ -523,12 +551,6 @@ function renderMIS(){
   const{orders,products,customers}=DATA;
   const priceMap=buildPriceMap(products);
   const loyalSet=new Set(customers.filter(isLoyalRow).map(c=>c['Name'].toLowerCase()));
-  const loyalCount=customers.filter(isLoyalRow).length;
-
-  const targetProfit=parseFloat(getSettingByKeyword('target'))||0;
-  const targetRevenue=targetProfit*2;
-  const loyalExpectedRevenue=targetRevenue*0.8;
-  const perLoyalCustomer=loyalCount>0?loyalExpectedRevenue/loyalCount:0;
 
   const monthly={};
   orders.forEach(o=>{
@@ -544,13 +566,6 @@ function renderMIS(){
   });
 
   const keys=Object.keys(monthly).sort().reverse();
-
-  const kpis=kpiRow(
-    kpiCard('Target Monthly Profit',targetProfit>0?inr(targetProfit):'—'),
-    kpiCard('Target Monthly Revenue',targetRevenue>0?inr(targetRevenue):'—',{sub:targetRevenue>0?`${inr(loyalExpectedRevenue)} (80%) expected from loyal customers`:''}),
-    kpiCard('Expected per Loyal Customer',perLoyalCustomer>0?inr(perLoyalCustomer):'—',{sub:`across ${loyalCount} loyal customer${loyalCount===1?'':'s'}`})
-  );
-  const footnote=`<div class="interval-note">Target Monthly Revenue = 2× Target Monthly Profit (assumes ~50% margin). Expected per Loyal Customer = 80% of Target Revenue ÷ number of loyal customers.</div>`;
 
   let trendHTML;
   if(keys.length===0){
@@ -580,7 +595,7 @@ function renderMIS(){
     trendHTML=`<div class="table-wrap"><table class="responsive-table"><thead>${thead}</thead><tbody>${bodyRows}</tbody></table></div>`;
   }
 
-  return `${kpis}${footnote}<div class="section"><div class="section-title">📈 Monthly Trend</div>${trendHTML}</div>`;
+  return `<div class="section"><div class="section-title">📈 Monthly Trend</div>${trendHTML}</div>`;
 }
 
 /* ===================== TAB: CUSTOMERS ===================== */
