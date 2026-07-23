@@ -75,6 +75,9 @@
   .pill-green{background:var(--green-light);color:var(--green);}
   .pill-amber{background:var(--amber-light);color:var(--amber);}
   .pill-red{background:var(--red-light);color:var(--red);}
+  .pill-gold{background:var(--gold-light);color:var(--gold);}
+  .pill-muted{background:#F0E8DC;color:#B5A48C;}
+  .pill-group{display:inline-flex;flex-wrap:wrap;gap:4px;}
 
   .pending-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
   .sub-title{font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;
@@ -131,6 +134,7 @@
       text-align:left;font-size:0.63rem;text-transform:uppercase;letter-spacing:0.03em;flex-shrink:0;}
     .responsive-table td.no-label::before{content:none;}
     .responsive-table td.no-label{justify-content:flex-end;}
+    .responsive-table td .pill-group{justify-content:flex-end;}
     .responsive-table td.history-cell{display:block;text-align:left;}
     .responsive-table td.history-cell::before{content:none;}
     .history-row.open{display:block !important;}
@@ -194,6 +198,7 @@ function diffDays(from,to){return Math.round((to-from)/86400000);}
 function monthKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
 function monthLabel(key){const[y,m]=key.split('-');return new Date(y,m-1,1).toLocaleString('en-IN',{month:'long',year:'numeric'});}
 function monthLabelShort(key){const[y,m]=key.split('-');return new Date(y,m-1,1).toLocaleString('en-IN',{month:'short',year:'2-digit'});}
+function monthNameShort(key){const[y,m]=key.split('-');return new Date(y,m-1,1).toLocaleString('en-IN',{month:'short'});}
 function last3CalendarMonthKeys(){
   const keys=[];
   for(let i=0;i<3;i++){
@@ -443,11 +448,15 @@ function computeReminderRows(customers,orders,priceMap){
 
     const monthlyMap={};
     computeCustomerMonthly(name,priceMap).forEach(m=>{monthlyMap[m.key]=m.revenue;});
-    const last3Display=last3CalendarMonthKeys().map(k=>`${monthLabelShort(k)} ${inr(monthlyMap[k]||0)}`).join(' · ');
+    const last3Pills='<span class="pill-group">'+last3CalendarMonthKeys().map(k=>{
+      const rev=monthlyMap[k]||0;
+      const mLabel=monthNameShort(k);
+      return rev>0 ? pill(`${mLabel} ${inr(rev)}`,'gold') : pill(mLabel,'muted');
+    }).join('')+'</span>';
 
     const pendingTaskCount=(DATA.tasks||[]).filter(t=>(t['Related Customer']||'').toLowerCase()===name.toLowerCase()&&!isTaskDone(t)).length;
 
-    rows.push({name,lastOrderDate,daysSince,status,statusType,totalRevenue,basketValue,last3Display,pendingTaskCount});
+    rows.push({name,lastOrderDate,daysSince,status,statusType,totalRevenue,basketValue,last3Pills,pendingTaskCount});
   });
   const rank={'Overdue':0,'No Orders Yet':1,'Due':2,'On Track':3};
   rows.sort((a,b)=>(rank[a.status]-rank[b.status])||((b.daysSince||0)-(a.daysSince||0)));
@@ -471,7 +480,7 @@ function renderReminderTracker(priceMap){
       <td data-label="Days Since">${daysDisplay}</td>
       <td data-label="Last Order">${r.lastOrderDate?fmtDate(r.lastOrderDate):'—'}</td>
       <td data-label="Basket Value">${inr(r.basketValue)}</td>
-      <td data-label="Last 3 Months">${r.last3Display}</td>
+      <td data-label="Last 3 Months">${r.last3Pills}</td>
       <td data-label="Lifetime Value">${inr(r.totalRevenue)}</td>
       <td data-label="" class="no-label"><a class="view-history-link" id="hist-link-${idx}" data-label="View Profile" onclick="toggleHistory(${idx})">View Profile</a></td>
     </tr>`;
