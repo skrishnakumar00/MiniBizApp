@@ -194,6 +194,14 @@ function diffDays(from,to){return Math.round((to-from)/86400000);}
 function monthKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
 function monthLabel(key){const[y,m]=key.split('-');return new Date(y,m-1,1).toLocaleString('en-IN',{month:'long',year:'numeric'});}
 function monthLabelShort(key){const[y,m]=key.split('-');return new Date(y,m-1,1).toLocaleString('en-IN',{month:'short',year:'2-digit'});}
+function last3CalendarMonthKeys(){
+  const keys=[];
+  for(let i=0;i<3;i++){
+    const d=new Date(today.getFullYear(),today.getMonth()-i,1);
+    keys.push(monthKey(d));
+  }
+  return keys;
+}
 function pill(label,type){return`<span class="pill pill-${type}">${label}</span>`;}
 function pct(n){return isFinite(n)?n.toFixed(0)+'%':'—';}
 function inr(n){return isFinite(n)?'₹'+n.toFixed(0):'—';}
@@ -433,12 +441,13 @@ function computeReminderRows(customers,orders,priceMap){
     const basketItems=(DATA.basket||[]).filter(b=>b['Customer Name'].toLowerCase()===name.toLowerCase());
     const basketValue=basketItems.reduce((s,b)=>s+basketLineValue(b,priceMap),0);
 
-    const last3=computeCustomerMonthly(name,priceMap).slice(0,3);
-    const last3MonthsValue=last3.reduce((s,m)=>s+m.revenue,0);
+    const monthlyMap={};
+    computeCustomerMonthly(name,priceMap).forEach(m=>{monthlyMap[m.key]=m.revenue;});
+    const last3Display=last3CalendarMonthKeys().map(k=>`${monthLabelShort(k)} ${inr(monthlyMap[k]||0)}`).join(' · ');
 
     const pendingTaskCount=(DATA.tasks||[]).filter(t=>(t['Related Customer']||'').toLowerCase()===name.toLowerCase()&&!isTaskDone(t)).length;
 
-    rows.push({name,lastOrderDate,daysSince,status,statusType,totalRevenue,basketValue,last3MonthsValue,pendingTaskCount});
+    rows.push({name,lastOrderDate,daysSince,status,statusType,totalRevenue,basketValue,last3Display,pendingTaskCount});
   });
   const rank={'Overdue':0,'No Orders Yet':1,'Due':2,'On Track':3};
   rows.sort((a,b)=>(rank[a.status]-rank[b.status])||((b.daysSince||0)-(a.daysSince||0)));
@@ -462,7 +471,7 @@ function renderReminderTracker(priceMap){
       <td data-label="Days Since">${daysDisplay}</td>
       <td data-label="Last Order">${r.lastOrderDate?fmtDate(r.lastOrderDate):'—'}</td>
       <td data-label="Basket Value">${inr(r.basketValue)}</td>
-      <td data-label="Last 3 Months">${inr(r.last3MonthsValue)}</td>
+      <td data-label="Last 3 Months">${r.last3Display}</td>
       <td data-label="Lifetime Value">${inr(r.totalRevenue)}</td>
       <td data-label="" class="no-label"><a class="view-history-link" id="hist-link-${idx}" data-label="View Profile" onclick="toggleHistory(${idx})">View Profile</a></td>
     </tr>`;
