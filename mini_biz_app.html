@@ -311,12 +311,22 @@ function getSettingByKeyword(keyword){
 function distinctOrderCount(orders){
   return new Set(orders.map(o=>o['Order Id']).filter(Boolean)).size;
 }
+function effectiveDueDate(t){
+  return parseDate(t['Revised Due Date']) || parseDate(t['Due Date']);
+}
 function taskStatusPill(t){
-  const due=parseDate(t['Due Date']);
+  const due=effectiveDueDate(t);
   const statusRaw=(t['Status']||'').toLowerCase();
   if(statusRaw.includes('done')||statusRaw.includes('complete')) return pill(t['Status']||'Done','green');
   if(due && diffDays(due,today)>0) return pill('Overdue','red');
   return pill(t['Status']||'Open','amber');
+}
+function taskStatusCategory(t){
+  const statusRaw=(t['Status']||'').toLowerCase();
+  if(statusRaw.includes('done')||statusRaw.includes('complete')) return 2;
+  const due=effectiveDueDate(t);
+  if(due && diffDays(due,today)>0) return 0;
+  return 1;
 }
 
 /* ===================== CUSTOMER 360 PROFILE (shared) ===================== */
@@ -363,8 +373,8 @@ function buildCustomerProfileHTML(name,priceMap,outerIdx){
   const orderTable=renderTable(['Order Id','Product','Qty','Order Date','Delivery Date','Payment','Amount'],orderRows,{emptyText:'No orders yet for this customer.'});
 
   const custTasks=(DATA.tasks||[]).filter(t=>(t['Related Customer']||'').toLowerCase()===name.toLowerCase()&&!isTaskDone(t));
-  const taskRows=custTasks.map(t=>[t['Task'],t['Owner'],t['Due Date']?fmtDate(parseDate(t['Due Date'])):'—',taskStatusPill(t)]);
-  const taskTable=renderTable(['Task','Owner','Due Date','Status'],taskRows,{emptyText:'No pending tasks for this customer.'});
+  const taskRows=custTasks.map(t=>[t['Task'],t['Owner'],t['Due Date']?fmtDate(parseDate(t['Due Date'])):'—',t['Revised Due Date']?fmtDate(parseDate(t['Revised Due Date'])):'—',taskStatusPill(t)]);
+  const taskTable=renderTable(['Task','Owner','Due Date','Revised Due Date','Status'],taskRows,{emptyText:'No pending tasks for this customer.'});
 
   const monthly=computeCustomerMonthly(name,priceMap);
   const last3=monthly.slice(0,3);
@@ -799,12 +809,14 @@ function filterTasksTable(filter){
   if(filter==='open') list=list.filter(t=>!(((t['Status']||'').toLowerCase()).includes('done')||((t['Status']||'').toLowerCase()).includes('complete')));
   if(filter==='done') list=list.filter(t=>(((t['Status']||'').toLowerCase()).includes('done')||((t['Status']||'').toLowerCase()).includes('complete')));
   list=[...list].sort((a,b)=>{
-    const da=parseDate(a['Due Date']),db=parseDate(b['Due Date']);
+    const catDiff=taskStatusCategory(a)-taskStatusCategory(b);
+    if(catDiff!==0) return catDiff;
+    const da=effectiveDueDate(a),db=effectiveDueDate(b);
     return(da?da.getTime():Infinity)-(db?db.getTime():Infinity);
   });
-  const rows=list.map(t=>[t['Task'],t['Related Customer']||'—',t['Owner'],t['Due Date']?fmtDate(parseDate(t['Due Date'])):'—',taskStatusPill(t)]);
+  const rows=list.map(t=>[t['Task'],t['Related Customer']||'—',t['Owner'],t['Due Date']?fmtDate(parseDate(t['Due Date'])):'—',t['Revised Due Date']?fmtDate(parseDate(t['Revised Due Date'])):'—',taskStatusPill(t)]);
   const el=document.getElementById('tasksResults');
-  if(el) el.innerHTML=renderTable(['Task','Related Customer','Owner','Due Date','Status'],rows,{emptyText:'No tasks in this filter.'});
+  if(el) el.innerHTML=renderTable(['Task','Related Customer','Owner','Due Date','Revised Due Date','Status'],rows,{emptyText:'No tasks in this filter.'});
 }
 
 /* ===================== TAB SWITCHING ===================== */
