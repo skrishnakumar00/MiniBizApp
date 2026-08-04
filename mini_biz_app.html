@@ -711,20 +711,6 @@ function arrayBufferToBase64(buffer){
   }
   return btoa(binary);
 }
-async function loadRupeeFont(doc){
-  try{
-    const resp=await fetch('https://cdn.jsdelivr.net/fontsource/fonts/noto-sans@latest/latin-400-normal.ttf');
-    if(!resp.ok) throw new Error('font fetch failed: '+resp.status);
-    const buf=await resp.arrayBuffer();
-    const base64=arrayBufferToBase64(buf);
-    doc.addFileToVFS('NotoSans-Regular.ttf',base64);
-    doc.addFont('NotoSans-Regular.ttf','NotoSansRupee','normal');
-    return true;
-  }catch(e){
-    console.warn('Could not load Unicode font for ₹ symbol, falling back to "Rs.":',e.message);
-    return false;
-  }
-}
 async function loadLogoImage(){
   try{
     const resp=await fetch('mini-logo.png');
@@ -748,26 +734,27 @@ async function generateMenuPDF(){
 
   const gold=[200,131,42], ink=[28,16,8], muted=[122,102,82], border=[232,217,196];
 
-  const hasRupeeFont=await loadRupeeFont(doc);
-  const priceFont=hasRupeeFont?'NotoSansRupee':'helvetica';
-  const currencyPrefix=hasRupeeFont?'₹':'Rs. ';
-
   const logoDataUrl=await loadLogoImage();
   if(logoDataUrl){
-    const logoSize=24;
+    const logoSize=32;
     try{
       doc.addImage(logoDataUrl,'PNG',pageWidth/2-logoSize/2,y-6,logoSize,logoSize);
-      y+=logoSize+2;
+      y+=logoSize+4;
     }catch(e){
       console.warn('Could not draw logo image in PDF:',e.message);
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(20);
+      doc.setTextColor(...gold);
+      doc.text("Mini's Homely Masalas & Ready Mixes",pageWidth/2,y,{align:'center'});
+      y+=7;
     }
+  } else {
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(20);
+    doc.setTextColor(...gold);
+    doc.text("Mini's Homely Masalas & Ready Mixes",pageWidth/2,y,{align:'center'});
+    y+=7;
   }
-
-  doc.setFont('helvetica','bold');
-  doc.setFontSize(20);
-  doc.setTextColor(...gold);
-  doc.text("Mini's Homely Masalas & Ready Mixes",pageWidth/2,y,{align:'center'});
-  y+=7;
 
   doc.setFont('helvetica','italic');
   doc.setFontSize(11);
@@ -811,8 +798,8 @@ async function generateMenuPDF(){
     byCategory[cat].forEach(p=>{
       if(y>pageHeight-20){ doc.addPage(); y=24; }
       const name=p['Name']||'';
-      const qty=p['Qty']||p['Pack Size']||'';
-      const price=p['Price']?(currencyPrefix+parseFloat(p['Price']).toFixed(0)):'';
+      const qty=[p['Pack Size'],p['Qty']].filter(v=>v&&String(v).trim()).join(' ');
+      const price=p['Price']?('Rs. '+parseFloat(p['Price']).toFixed(0)):'';
 
       doc.setFont('helvetica','normal');
       doc.setFontSize(10.5);
@@ -822,7 +809,7 @@ async function generateMenuPDF(){
       doc.setTextColor(...muted);
       doc.text(String(qty),pageWidth-marginX-30,y);
 
-      doc.setFont(priceFont,hasRupeeFont?'normal':'bold');
+      doc.setFont('helvetica','bold');
       doc.setTextColor(...gold);
       doc.text(price,pageWidth-marginX,y,{align:'right'});
 
