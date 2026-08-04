@@ -16,7 +16,9 @@
   body{background:var(--cream);font-family:'Inter',sans-serif;color:var(--ink);min-height:100vh;}
 
   header{background:var(--ink);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
-  .hdr-left h1{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.3rem;}
+  .hdr-left h1{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.3rem;
+    display:flex;align-items:center;gap:10px;}
+  .hdr-left h1 img{height:38px;width:38px;object-fit:contain;}
   .hdr-left #last-updated{color:#9E8B78;font-size:0.7rem;margin-top:3px;}
   .hdr-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
   .hdr-right #today-date{color:#9E8B78;font-size:0.72rem;}
@@ -123,6 +125,7 @@
     nav.tabs{padding:0 8px;}
     header{padding:12px 16px;}
     .hdr-left h1{font-size:1.1rem;}
+    .hdr-left h1 img{height:30px;width:30px;}
     .container{padding:16px 12px 40px;}
 
     .responsive-table thead{display:none;}
@@ -147,7 +150,7 @@
 
 <header>
   <div class="hdr-left">
-    <h1>🫙 Mini's Homely Masalas</h1>
+    <h1><img src="mini-logo.png" alt="Mini's Homely Masalas logo" onerror="this.style.display='none'"> Mini's Homely Masalas</h1>
     <div id="last-updated">Loading…</div>
   </div>
   <div class="hdr-right">
@@ -683,8 +686,8 @@ function renderProducts(){
     kpiCard('Top Seller This Month',topProduct,{sub:topVal>0?inr(topVal)+' revenue':'no sales yet'})
   );
 
-  const rows=products.map(p=>[p['Sr No'],p['Category'],`<strong>${p['Name']}</strong>`,p['Pack Size'],p['Price']?inr(parseFloat(p['Price'])):'—',p['Margin %']||'—',p['Seasonal'],p['Notes']]);
-  const tableHTML=renderTable(['Sr No','Category','Name','Pack Size','Price','Margin %','Seasonal','Notes'],rows,{emptyText:'No products added yet.'});
+  const rows=products.map(p=>[p['Sr No'],p['Category'],`<strong>${p['Name']}</strong>`,p['Pack Size'],p['Qty']||'—',p['Price']?inr(parseFloat(p['Price'])):'—',p['Margin %']||'—',p['Seasonal'],p['Notes']]);
+  const tableHTML=renderTable(['Sr No','Category','Name','Pack Size','Qty','Price','Margin %','Seasonal','Notes'],rows,{emptyText:'No products added yet.'});
 
   return `${kpis}<div class="section"><div class="section-title">🧂 All Products
     <button class="btn-refresh" style="margin-left:auto;" onclick="generateMenuPDF()">📄 Download Menu</button>
@@ -699,7 +702,42 @@ function isExcludedFromMenu(p){
   }
   return false;
 }
-function generateMenuPDF(){
+function arrayBufferToBase64(buffer){
+  let binary='';
+  const bytes=new Uint8Array(buffer);
+  const chunkSize=0x8000;
+  for(let i=0;i<bytes.length;i+=chunkSize){
+    binary+=String.fromCharCode.apply(null,bytes.subarray(i,i+chunkSize));
+  }
+  return btoa(binary);
+}
+async function loadRupeeFont(doc){
+  try{
+    const resp=await fetch('https://cdn.jsdelivr.net/fontsource/fonts/noto-sans@latest/latin-400-normal.ttf');
+    if(!resp.ok) throw new Error('font fetch failed: '+resp.status);
+    const buf=await resp.arrayBuffer();
+    const base64=arrayBufferToBase64(buf);
+    doc.addFileToVFS('NotoSans-Regular.ttf',base64);
+    doc.addFont('NotoSans-Regular.ttf','NotoSansRupee','normal');
+    return true;
+  }catch(e){
+    console.warn('Could not load Unicode font for ₹ symbol, falling back to "Rs.":',e.message);
+    return false;
+  }
+}
+async function loadLogoImage(){
+  try{
+    const resp=await fetch('mini-logo.png');
+    if(!resp.ok) throw new Error('logo fetch failed: '+resp.status);
+    const buf=await resp.arrayBuffer();
+    const base64=arrayBufferToBase64(buf);
+    return 'data:image/png;base64,'+base64;
+  }catch(e){
+    console.warn('Could not load logo for PDF, using text-only header:',e.message);
+    return null;
+  }
+}
+async function generateMenuPDF(){
   if(!window.jspdf){ alert('PDF library still loading, please try again in a moment.'); return; }
   const{jsPDF}=window.jspdf;
   const doc=new jsPDF({unit:'mm',format:'a4'});
@@ -709,6 +747,21 @@ function generateMenuPDF(){
   let y=24;
 
   const gold=[200,131,42], ink=[28,16,8], muted=[122,102,82], border=[232,217,196];
+
+  const hasRupeeFont=await loadRupeeFont(doc);
+  const priceFont=hasRupeeFont?'NotoSansRupee':'helvetica';
+  const currencyPrefix=hasRupeeFont?'₹':'Rs. ';
+
+  const logoDataUrl=await loadLogoImage();
+  if(logoDataUrl){
+    const logoSize=24;
+    try{
+      doc.addImage(logoDataUrl,'PNG',pageWidth/2-logoSize/2,y-6,logoSize,logoSize);
+      y+=logoSize+2;
+    }catch(e){
+      console.warn('Could not draw logo image in PDF:',e.message);
+    }
+  }
 
   doc.setFont('helvetica','bold');
   doc.setFontSize(20);
@@ -758,8 +811,8 @@ function generateMenuPDF(){
     byCategory[cat].forEach(p=>{
       if(y>pageHeight-20){ doc.addPage(); y=24; }
       const name=p['Name']||'';
-      const pack=p['Pack Size']||'';
-      const price=p['Price']?('Rs. '+parseFloat(p['Price']).toFixed(0)):'';
+      const qty=p['Qty']||p['Pack Size']||'';
+      const price=p['Price']?(currencyPrefix+parseFloat(p['Price']).toFixed(0)):'';
 
       doc.setFont('helvetica','normal');
       doc.setFontSize(10.5);
@@ -767,9 +820,9 @@ function generateMenuPDF(){
       doc.text(name,marginX,y);
 
       doc.setTextColor(...muted);
-      doc.text(String(pack),pageWidth-marginX-30,y);
+      doc.text(String(qty),pageWidth-marginX-30,y);
 
-      doc.setFont('helvetica','bold');
+      doc.setFont(priceFont,hasRupeeFont?'normal':'bold');
       doc.setTextColor(...gold);
       doc.text(price,pageWidth-marginX,y,{align:'right'});
 
