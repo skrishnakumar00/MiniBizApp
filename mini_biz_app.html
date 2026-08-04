@@ -762,6 +762,12 @@ async function generateMenuPDF(){
   doc.text('Aromatic, Flavourful, Made with love',pageWidth/2,y,{align:'center'});
   y+=6;
 
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(9.5);
+  doc.setTextColor(...ink);
+  doc.text('For Orders / Enquiries — 9904187914, Padmini Prasad',pageWidth/2,y,{align:'center'});
+  y+=8;
+
   doc.setDrawColor(...gold);
   doc.setLineWidth(0.6);
   doc.line(marginX,y,pageWidth-marginX,y);
@@ -825,6 +831,7 @@ async function generateMenuPDF(){
     doc.setFont('helvetica','italic');
     doc.setFontSize(8.5);
     doc.setTextColor(...muted);
+    doc.text('FSSAI Lic. No. 20726038002046',pageWidth/2,pageHeight-14,{align:'center'});
     doc.text(`Menu as of ${dateStr}`,pageWidth/2,pageHeight-10,{align:'center'});
   }
 
