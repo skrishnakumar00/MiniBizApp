@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mini's Homely Masalas — Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   :root {
     --cream:#FAF3E8; --gold:#C8832A; --gold-light:#F2E0C4; --red:#A33B2A;
@@ -158,12 +159,12 @@
 
 <nav class="tabs">
   <button data-tab="operations" class="active" onclick="switchTab('operations')">📋 Operations</button>
+  <button data-tab="leads" onclick="switchTab('leads')">🌱 Leads</button>
+  <button data-tab="tasks" onclick="switchTab('tasks')">✅ Tasks</button>
+  <button data-tab="history" onclick="switchTab('history')">🧾 Order History</button>
   <button data-tab="mis" onclick="switchTab('mis')">📊 MIS</button>
   <button data-tab="customers" onclick="switchTab('customers')">👥 Customers</button>
   <button data-tab="products" onclick="switchTab('products')">🧂 Products</button>
-  <button data-tab="history" onclick="switchTab('history')">🧾 Order History</button>
-  <button data-tab="tasks" onclick="switchTab('tasks')">✅ Tasks</button>
-  <button data-tab="leads" onclick="switchTab('leads')">🌱 Leads</button>
 </nav>
 
 <div class="container" id="app">
@@ -376,7 +377,7 @@ function buildCustomerProfileHTML(name,priceMap,outerIdx){
   });
   const orderTable=renderTable(['Order Id','Product','Qty','Order Date','Delivery Date','Payment','Amount'],orderRows,{emptyText:'No orders yet for this customer.'});
 
-  const custTasks=(DATA.tasks||[]).filter(t=>(t['Related Customer']||'').toLowerCase()===name.toLowerCase()&&!isTaskDone(t));
+  const custTasks=(DATA.tasks||[]).filter(t=>(t['Related Contact']||'').toLowerCase()===name.toLowerCase()&&!isTaskDone(t));
   const taskRows=custTasks.map(t=>[t['Task'],t['Owner'],t['Due Date']?fmtDate(parseDate(t['Due Date'])):'—',t['Revised Due Date']?fmtDate(parseDate(t['Revised Due Date'])):'—',taskStatusPill(t)]);
   const taskTable=renderTable(['Task','Owner','Due Date','Revised Due Date','Status'],taskRows,{emptyText:'No pending tasks for this customer.'});
 
@@ -468,7 +469,7 @@ function computeReminderRows(customers,orders,priceMap){
       return rev>0 ? pill(`${mLabel} ${inr(rev)}`,'gold') : pill(mLabel,'muted');
     }).join('')+'</span>';
 
-    const pendingTaskCount=(DATA.tasks||[]).filter(t=>(t['Related Customer']||'').toLowerCase()===name.toLowerCase()&&!isTaskDone(t)).length;
+    const pendingTaskCount=(DATA.tasks||[]).filter(t=>(t['Related Contact']||'').toLowerCase()===name.toLowerCase()&&!isTaskDone(t)).length;
 
     rows.push({name,lastOrderDate,daysSince,status,statusType,totalRevenue,basketValue,last3Pills,pendingTaskCount});
   });
@@ -685,7 +686,109 @@ function renderProducts(){
   const rows=products.map(p=>[p['Sr No'],p['Category'],`<strong>${p['Name']}</strong>`,p['Pack Size'],p['Price']?inr(parseFloat(p['Price'])):'—',p['Margin %']||'—',p['Seasonal'],p['Notes']]);
   const tableHTML=renderTable(['Sr No','Category','Name','Pack Size','Price','Margin %','Seasonal','Notes'],rows,{emptyText:'No products added yet.'});
 
-  return `${kpis}<div class="section"><div class="section-title">🧂 All Products</div>${tableHTML}</div>`;
+  return `${kpis}<div class="section"><div class="section-title">🧂 All Products
+    <button class="btn-refresh" style="margin-left:auto;" onclick="generateMenuPDF()">📄 Download Menu</button>
+  </div>${tableHTML}</div>`;
+}
+function isExcludedFromMenu(p){
+  for(const k in p){
+    if(k.toLowerCase().includes('menu')){
+      const v=(p[k]||'').trim().toUpperCase();
+      return v.startsWith('N');
+    }
+  }
+  return false;
+}
+function generateMenuPDF(){
+  if(!window.jspdf){ alert('PDF library still loading, please try again in a moment.'); return; }
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:'a4'});
+  const pageWidth=doc.internal.pageSize.getWidth();
+  const pageHeight=doc.internal.pageSize.getHeight();
+  const marginX=18;
+  let y=24;
+
+  const gold=[200,131,42], ink=[28,16,8], muted=[122,102,82], border=[232,217,196];
+
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(20);
+  doc.setTextColor(...gold);
+  doc.text("Mini's Homely Masalas & Ready Mixes",pageWidth/2,y,{align:'center'});
+  y+=7;
+
+  doc.setFont('helvetica','italic');
+  doc.setFontSize(11);
+  doc.setTextColor(...muted);
+  doc.text('Aromatic, Flavourful, Made with love',pageWidth/2,y,{align:'center'});
+  y+=6;
+
+  doc.setDrawColor(...gold);
+  doc.setLineWidth(0.6);
+  doc.line(marginX,y,pageWidth-marginX,y);
+  y+=10;
+
+  const products=(DATA.products||[]).filter(p=>!isExcludedFromMenu(p));
+  const byCategory={};
+  products.forEach(p=>{
+    const cat=p['Category']||'Other';
+    if(!byCategory[cat]) byCategory[cat]=[];
+    byCategory[cat].push(p);
+  });
+  const categories=Object.keys(byCategory).sort();
+
+  if(categories.length===0){
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(11);
+    doc.setTextColor(...muted);
+    doc.text('No products available to show.',marginX,y);
+  }
+
+  categories.forEach(cat=>{
+    if(y>pageHeight-35){ doc.addPage(); y=24; }
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(13);
+    doc.setTextColor(...ink);
+    doc.text(cat,marginX,y);
+    y+=2;
+    doc.setDrawColor(...border);
+    doc.setLineWidth(0.3);
+    doc.line(marginX,y,pageWidth-marginX,y);
+    y+=7;
+
+    byCategory[cat].forEach(p=>{
+      if(y>pageHeight-20){ doc.addPage(); y=24; }
+      const name=p['Name']||'';
+      const pack=p['Pack Size']||'';
+      const price=p['Price']?('Rs. '+parseFloat(p['Price']).toFixed(0)):'';
+
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(10.5);
+      doc.setTextColor(...ink);
+      doc.text(name,marginX,y);
+
+      doc.setTextColor(...muted);
+      doc.text(String(pack),pageWidth-marginX-30,y);
+
+      doc.setFont('helvetica','bold');
+      doc.setTextColor(...gold);
+      doc.text(price,pageWidth-marginX,y,{align:'right'});
+
+      y+=7;
+    });
+    y+=6;
+  });
+
+  const dateStr=today.toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
+  const pageCount=doc.internal.getNumberOfPages();
+  for(let i=1;i<=pageCount;i++){
+    doc.setPage(i);
+    doc.setFont('helvetica','italic');
+    doc.setFontSize(8.5);
+    doc.setTextColor(...muted);
+    doc.text(`Menu as of ${dateStr}`,pageWidth/2,pageHeight-10,{align:'center'});
+  }
+
+  doc.save('Minis-Homely-Masalas-Menu.pdf');
 }
 
 /* ===================== TAB: ORDER HISTORY ===================== */
@@ -818,9 +921,9 @@ function filterTasksTable(filter){
     const da=effectiveDueDate(a),db=effectiveDueDate(b);
     return(da?da.getTime():Infinity)-(db?db.getTime():Infinity);
   });
-  const rows=list.map(t=>[t['Task'],t['Related Customer']||'—',t['Owner'],t['Due Date']?fmtDate(parseDate(t['Due Date'])):'—',t['Revised Due Date']?fmtDate(parseDate(t['Revised Due Date'])):'—',taskStatusPill(t)]);
+  const rows=list.map(t=>[t['Task'],t['Related Contact']||'—',t['Owner'],t['Due Date']?fmtDate(parseDate(t['Due Date'])):'—',t['Revised Due Date']?fmtDate(parseDate(t['Revised Due Date'])):'—',taskStatusPill(t)]);
   const el=document.getElementById('tasksResults');
-  if(el) el.innerHTML=renderTable(['Task','Related Customer','Owner','Due Date','Revised Due Date','Status'],rows,{emptyText:'No tasks in this filter.'});
+  if(el) el.innerHTML=renderTable(['Task','Related Contact','Owner','Due Date','Revised Due Date','Status'],rows,{emptyText:'No tasks in this filter.'});
 }
 
 /* ===================== TAB: LEADS ===================== */
@@ -867,19 +970,22 @@ function filterLeadsTable(filter){
   if(filter==='lead') list=list.filter(l=>(l['Type']||'').toLowerCase().includes('lead'));
   if(filter==='referrer') list=list.filter(l=>(l['Type']||'').toLowerCase().includes('referrer'));
 
-  const headers=['Name','Type','Status','Last Contact',''];
+  const headers=['Name','Type','Status','Tasks','Last Contact',''];
   const thead='<tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr>';
   const bodyRows=list.map(l=>{
     const idx=historyIdCounter++;
     const lastContact=computeLastContact(l['Name']);
+    const pendingTaskCount=(DATA.tasks||[]).filter(t=>(t['Related Contact']||'').toLowerCase()===l['Name'].toLowerCase()&&!isTaskDone(t)).length;
+    const tasksDisplay=pendingTaskCount>0?pill(String(pendingTaskCount),'amber'):'—';
     const mainRow=`<tr>
       <td data-label="Name"><strong>${l['Name']}</strong></td>
       <td data-label="Type">${l['Type']||'—'}</td>
       <td data-label="Status">${l['Status']||'—'}</td>
+      <td data-label="Tasks">${tasksDisplay}</td>
       <td data-label="Last Contact">${lastContact?fmtDate(lastContact):'—'}</td>
       <td data-label="" class="no-label"><a class="view-history-link" id="hist-link-${idx}" data-label="View Profile" onclick="toggleHistory(${idx})">View Profile</a></td>
     </tr>`;
-    const detailRow=`<tr class="history-row" id="hist-${idx}"><td colspan="5" class="history-cell">${buildLeadProfileHTML(l['Name'])}</td></tr>`;
+    const detailRow=`<tr class="history-row" id="hist-${idx}"><td colspan="6" class="history-cell">${buildLeadProfileHTML(l['Name'])}</td></tr>`;
     return mainRow+detailRow;
   }).join('');
 
@@ -932,12 +1038,12 @@ async function init(){
 
     app.innerHTML=`
       <div class="panel active" id="panel-operations">${opsHTML}</div>
+      <div class="panel" id="panel-leads">${leadsHTML}</div>
+      <div class="panel" id="panel-tasks">${tasksHTML}</div>
+      <div class="panel" id="panel-history">${histHTML}</div>
       <div class="panel" id="panel-mis">${misHTML}</div>
       <div class="panel" id="panel-customers">${custHTML}</div>
-      <div class="panel" id="panel-products">${prodHTML}</div>
-      <div class="panel" id="panel-history">${histHTML}</div>
-      <div class="panel" id="panel-tasks">${tasksHTML}</div>
-      <div class="panel" id="panel-leads">${leadsHTML}</div>`;
+      <div class="panel" id="panel-products">${prodHTML}</div>`;
 
     filterCustomersTable('all');
     renderOrderHistoryResults();
