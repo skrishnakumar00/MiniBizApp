@@ -44,6 +44,7 @@
     display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
   .section-title .badge{background:var(--gold);color:white;font-family:'Inter',sans-serif;
     font-size:0.66rem;font-weight:600;padding:2px 8px;border-radius:20px;}
+  .section-title .badge-muted{background:#F0E8DC;color:#B5A48C;}
   .section{margin-bottom:32px;}
 
   .loading{text-align:center;padding:60px 20px;color:var(--muted);font-size:0.9rem;}
@@ -162,6 +163,7 @@
   <button data-tab="products" onclick="switchTab('products')">🧂 Products</button>
   <button data-tab="history" onclick="switchTab('history')">🧾 Order History</button>
   <button data-tab="tasks" onclick="switchTab('tasks')">✅ Tasks</button>
+  <button data-tab="leads" onclick="switchTab('leads')">🌱 Leads</button>
 </nav>
 
 <div class="container" id="app">
@@ -177,7 +179,9 @@ const SHEET_TABS = {
   orders:    BASE + '?gid=718714399&single=true&output=csv',
   settings:  BASE + '?gid=1019938917&single=true&output=csv',
   basket:    BASE + '?gid=429468414&single=true&output=csv',
-  tasks:     BASE + '?gid=1537440528&single=true&output=csv'
+  tasks:     BASE + '?gid=1537440528&single=true&output=csv',
+  leads:     BASE + '?gid=726348890&single=true&output=csv',
+  leadInteractions: BASE + '?gid=1452687738&single=true&output=csv'
 };
 
 const today = new Date(); today.setHours(0,0,0,0);
@@ -504,13 +508,13 @@ function renderReminderTracker(priceMap){
   const html=`<div class="table-wrap"><table class="responsive-table"><thead>${thead}</thead><tbody>${bodyRows}</tbody></table></div>
     <div class="interval-note">Check-in interval: every ${interval} days · overdue after ${interval*2} days (set in Settings sheet)</div>`;
 
-  return{html,dueCount,overdueCount};
+  return{html,dueCount,overdueCount,totalCount:rows.length};
 }
 
 function renderOperations(){
   const{customers,products,orders}=DATA;
   const priceMap=buildPriceMap(products);
-  const{html:trackerHTML,dueCount,overdueCount}=renderReminderTracker(priceMap);
+  const{html:trackerHTML,dueCount,overdueCount,totalCount}=renderReminderTracker(priceMap);
 
   const pendingDel=orders.filter(o=>o['Order Date']&&o['Order Date'].trim()&&(!o['Delivery Date']||!o['Delivery Date'].trim()));
   const pendingPay=orders.filter(o=>!o['Payment Date']||!o['Payment Date'].trim());
@@ -543,7 +547,7 @@ function renderOperations(){
   if(pendingPay.length>0) payHTML+=`<div class="pending-total">Total Pending: ${inr(pendingPayTotal)}</div>`;
 
   return `${kpis}${footnote}
-    <div class="section"><div class="section-title">📞 Loyal Customer Check-ins <span class="badge">${overdueCount+dueCount} need attention</span></div>${trackerHTML}</div>
+    <div class="section"><div class="section-title">📞 Loyal Customer Check-ins <span class="badge">${overdueCount+dueCount} need attention</span> <span class="badge badge-muted">${totalCount} total</span></div>${trackerHTML}</div>
     <div class="section"><div class="section-title">📦 Pending Orders & Payments</div>
       <div class="pending-grid">
         <div><div class="sub-title">🚚 Pending Deliveries (${pendingDel.length})</div>${delivHTML}</div>
@@ -819,6 +823,73 @@ function filterTasksTable(filter){
   if(el) el.innerHTML=renderTable(['Task','Related Customer','Owner','Due Date','Revised Due Date','Status'],rows,{emptyText:'No tasks in this filter.'});
 }
 
+/* ===================== TAB: LEADS ===================== */
+function computeLastContact(leadName){
+  const interactions=(DATA.leadInteractions||[]).filter(i=>(i['Lead Name']||'').toLowerCase()===leadName.toLowerCase());
+  let lastDate=null;
+  interactions.forEach(i=>{
+    const d=parseDate(i['Date']);
+    if(d&&(!lastDate||d>lastDate)) lastDate=d;
+  });
+  return lastDate;
+}
+function buildLeadProfileHTML(name){
+  let interactions=(DATA.leadInteractions||[]).filter(i=>(i['Lead Name']||'').toLowerCase()===name.toLowerCase());
+  interactions.sort((a,b)=>{
+    const da=parseDate(a['Date']),db=parseDate(b['Date']);
+    return(db?db.getTime():0)-(da?da.getTime():0);
+  });
+  const rows=interactions.map(i=>[fmtDate(parseDate(i['Date'])),i['Notes']||'']);
+  return renderTable(['Date','Notes'],rows,{emptyText:'No interactions logged yet.'});
+}
+function renderLeadsTab(){
+  const leads=DATA.leads||[];
+  const leadCount=leads.filter(l=>(l['Type']||'').toLowerCase().includes('lead')).length;
+  const referrerCount=leads.filter(l=>(l['Type']||'').toLowerCase().includes('referrer')).length;
+
+  const kpis=kpiRow(
+    kpiCard('Total Leads',leadCount),
+    kpiCard('Total Referrers',referrerCount,{color:'gold'})
+  );
+
+  return `${kpis}<div class="section"><div class="section-title">🌱 Leads &amp; Referrers</div>
+    <div class="filter-pills" id="leadFilterPills">
+      <button class="filter-pill active" data-filter="all" onclick="filterLeadsTable('all')">All</button>
+      <button class="filter-pill" data-filter="lead" onclick="filterLeadsTable('lead')">Leads</button>
+      <button class="filter-pill" data-filter="referrer" onclick="filterLeadsTable('referrer')">Referrers</button>
+    </div>
+    <div id="leadsResults"></div>
+  </div>`;
+}
+function filterLeadsTable(filter){
+  document.querySelectorAll('#leadFilterPills .filter-pill').forEach(b=>b.classList.toggle('active',b.dataset.filter===filter));
+  let list=DATA.leads||[];
+  if(filter==='lead') list=list.filter(l=>(l['Type']||'').toLowerCase().includes('lead'));
+  if(filter==='referrer') list=list.filter(l=>(l['Type']||'').toLowerCase().includes('referrer'));
+
+  const headers=['Name','Type','Status','Last Contact',''];
+  const thead='<tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr>';
+  const bodyRows=list.map(l=>{
+    const idx=historyIdCounter++;
+    const lastContact=computeLastContact(l['Name']);
+    const mainRow=`<tr>
+      <td data-label="Name"><strong>${l['Name']}</strong></td>
+      <td data-label="Type">${l['Type']||'—'}</td>
+      <td data-label="Status">${l['Status']||'—'}</td>
+      <td data-label="Last Contact">${lastContact?fmtDate(lastContact):'—'}</td>
+      <td data-label="" class="no-label"><a class="view-history-link" id="hist-link-${idx}" data-label="View Profile" onclick="toggleHistory(${idx})">View Profile</a></td>
+    </tr>`;
+    const detailRow=`<tr class="history-row" id="hist-${idx}"><td colspan="5" class="history-cell">${buildLeadProfileHTML(l['Name'])}</td></tr>`;
+    return mainRow+detailRow;
+  }).join('');
+
+  const tableHTML=list.length===0?'<div class="empty">No leads in this filter.</div>':
+    `<div class="table-wrap"><table class="responsive-table"><thead>${thead}</thead><tbody>${bodyRows}</tbody></table></div>`;
+
+  const el=document.getElementById('leadsResults');
+  if(el) el.innerHTML=tableHTML;
+}
+
 /* ===================== TAB SWITCHING ===================== */
 function switchTab(tab){
   document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
@@ -836,25 +907,28 @@ async function init(){
   selectedMonths=new Set();
 
   try{
-    const[customers,products,orders,settings,basket,tasks]=await Promise.all([
+    const[customers,products,orders,settings,basket,tasks,leads,leadInteractions]=await Promise.all([
       fetchCSV(SHEET_TABS.customers),
       fetchCSV(SHEET_TABS.products),
       fetchCSV(SHEET_TABS.orders),
       fetchCSV(SHEET_TABS.settings).catch(()=>[]),
       fetchCSV(SHEET_TABS.basket).catch(()=>[]),
-      fetchCSV(SHEET_TABS.tasks).catch(()=>[])
+      fetchCSV(SHEET_TABS.tasks).catch(()=>[]),
+      fetchCSV(SHEET_TABS.leads).catch(()=>[]),
+      fetchCSV(SHEET_TABS.leadInteractions).catch(()=>[])
     ]);
-    DATA={customers,products,orders,settings,basket,tasks};
+    DATA={customers,products,orders,settings,basket,tasks,leads,leadInteractions};
 
     document.getElementById('last-updated').textContent='Last refreshed: '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
 
-    let opsHTML,misHTML,custHTML,prodHTML,histHTML,tasksHTML;
+    let opsHTML,misHTML,custHTML,prodHTML,histHTML,tasksHTML,leadsHTML;
     try{opsHTML=renderOperations();}catch(e){opsHTML='<div class="error-msg">Operations error: '+e.message+'</div>';}
     try{misHTML=renderMIS();}catch(e){misHTML='<div class="error-msg">MIS error: '+e.message+'</div>';}
     try{custHTML=renderCustomers();}catch(e){custHTML='<div class="error-msg">Customers error: '+e.message+'</div>';}
     try{prodHTML=renderProducts();}catch(e){prodHTML='<div class="error-msg">Products error: '+e.message+'</div>';}
     try{histHTML=renderOrderHistoryTab();}catch(e){histHTML='<div class="error-msg">Order History error: '+e.message+'</div>';}
     try{tasksHTML=renderTasksTab();}catch(e){tasksHTML='<div class="error-msg">Tasks error: '+e.message+'</div>';}
+    try{leadsHTML=renderLeadsTab();}catch(e){leadsHTML='<div class="error-msg">Leads error: '+e.message+'</div>';}
 
     app.innerHTML=`
       <div class="panel active" id="panel-operations">${opsHTML}</div>
@@ -862,11 +936,13 @@ async function init(){
       <div class="panel" id="panel-customers">${custHTML}</div>
       <div class="panel" id="panel-products">${prodHTML}</div>
       <div class="panel" id="panel-history">${histHTML}</div>
-      <div class="panel" id="panel-tasks">${tasksHTML}</div>`;
+      <div class="panel" id="panel-tasks">${tasksHTML}</div>
+      <div class="panel" id="panel-leads">${leadsHTML}</div>`;
 
     filterCustomersTable('all');
     renderOrderHistoryResults();
     filterTasksTable('all');
+    filterLeadsTable('all');
   }catch(e){
     app.innerHTML=`<div class="error-msg">⚠️ Could not load data. Check your internet connection and that the Google Sheet is published to web.<br><small>${e.message}</small></div>`;
     document.getElementById('last-updated').textContent='Failed to load';
