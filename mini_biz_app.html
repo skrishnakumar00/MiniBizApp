@@ -336,6 +336,15 @@ function taskStatusCategory(t){
   if(due && diffDays(due,today)>0) return 0;
   return 1;
 }
+function taskUrgency(t){
+  if(isTaskDone(t)) return 'done';
+  const due=effectiveDueDate(t);
+  if(!due) return 'pending';
+  const daysRemaining=diffDays(today,due);
+  if(daysRemaining<0) return 'overdue';
+  if(daysRemaining<=2) return 'duesoon';
+  return 'pending';
+}
 
 /* ===================== CUSTOMER 360 PROFILE (shared) ===================== */
 function computeCustomerMonthly(name,priceMap){
@@ -935,39 +944,81 @@ function renderOrderHistoryResults(){
 }
 
 /* ===================== TAB: TASKS ===================== */
+function buildOwnerSummaryTable(){
+  const tasks=DATA.tasks||[];
+  const owners=[...new Set(tasks.map(t=>t['Owner']).filter(o=>o&&o.trim()))].sort();
+  if(owners.length===0) return '<div class="empty">No tasks with an owner assigned yet.</div>';
+
+  const rows=owners.map(owner=>{
+    const ownerTasks=tasks.filter(t=>t['Owner']===owner);
+    const overdueCount=ownerTasks.filter(t=>taskUrgency(t)==='overdue').length;
+    const dueSoonCount=ownerTasks.filter(t=>taskUrgency(t)==='duesoon').length;
+    const overdueCell=overdueCount>0?`<a class="view-history-link" onclick="quickFilterTasks('${owner}','overdue')">${overdueCount}</a>`:'<span class="empty" style="padding:0;">0</span>';
+    const dueSoonCell=dueSoonCount>0?`<a class="view-history-link" onclick="quickFilterTasks('${owner}','duesoon')">${dueSoonCount}</a>`:'<span class="empty" style="padding:0;">0</span>';
+    return[`<strong>${owner}</strong>`,overdueCell,dueSoonCell];
+  });
+  return renderTable(['Owner','Overdue','Due Soon (2 days)'],rows,{emptyText:'No tasks yet.'});
+}
 function renderTasksTab(){
   const tasks=DATA.tasks||[];
-  const total=tasks.length;
-  const openCount=tasks.filter(t=>{
-    const s=(t['Status']||'').toLowerCase();
-    return !(s.includes('done')||s.includes('complete'));
-  }).length;
+  const owners=[...new Set(tasks.map(t=>t['Owner']).filter(o=>o&&o.trim()))].sort();
+  const ownerOptions=['<option value="">All Owners</option>'].concat(
+    owners.map(o=>`<option value="${o}">${o}</option>`)).join('');
 
-  const kpis=kpiRow(
-    kpiCard('Total Tasks',total),
-    kpiCard('Open Tasks',openCount,{color:'amber'})
-  );
-
-  return `${kpis}<div class="section"><div class="section-title">✅ All Tasks</div>
+  return `<div class="section"><div class="section-title">👀 Daily Heads-Up — Overdue &amp; Due Soon by Owner</div>${buildOwnerSummaryTable()}</div>
+    <div class="section"><div class="section-title">✅ All Tasks</div>
+    <div class="filter-row">
+      <select id="taskOwnerFilter" onchange="filterTasksTable(getActiveTaskFilter())">${ownerOptions}</select>
+    </div>
     <div class="filter-pills" id="taskFilterPills">
       <button class="filter-pill active" data-filter="all" onclick="filterTasksTable('all')">All</button>
       <button class="filter-pill" data-filter="open" onclick="filterTasksTable('open')">Open</button>
+      <button class="filter-pill" data-filter="overdue" onclick="filterTasksTable('overdue')">Overdue</button>
+      <button class="filter-pill" data-filter="duesoon" onclick="filterTasksTable('duesoon')">Due Soon</button>
       <button class="filter-pill" data-filter="done" onclick="filterTasksTable('done')">Done</button>
     </div>
     <div id="tasksResults"></div>
   </div>`;
 }
+function getActiveTaskFilter(){
+  const active=document.querySelector('#taskFilterPills .filter-pill.active');
+  return active?active.dataset.filter:'all';
+}
+function quickFilterTasks(owner,urgency){
+  const ownerSel=document.getElementById('taskOwnerFilter');
+  if(ownerSel) ownerSel.value=owner;
+  filterTasksTable(urgency);
+}
 function filterTasksTable(filter){
   document.querySelectorAll('#taskFilterPills .filter-pill').forEach(b=>b.classList.toggle('active',b.dataset.filter===filter));
+  const ownerSel=document.getElementById('taskOwnerFilter');
+  const ownerVal=ownerSel?ownerSel.value:'';
+
   let list=DATA.tasks||[];
-  if(filter==='open') list=list.filter(t=>!(((t['Status']||'').toLowerCase()).includes('done')||((t['Status']||'').toLowerCase()).includes('complete')));
-  if(filter==='done') list=list.filter(t=>(((t['Status']||'').toLowerCase()).includes('done')||((t['Status']||'').toLowerCase()).includes('complete')));
-  list=[...list].sort((a,b)=>{
-    const catDiff=taskStatusCategory(a)-taskStatusCategory(b);
-    if(catDiff!==0) return catDiff;
-    const da=effectiveDueDate(a),db=effectiveDueDate(b);
-    return(da?da.getTime():Infinity)-(db?db.getTime():Infinity);
-  });
+  if(ownerVal) list=list.filter(t=>t['Owner']===ownerVal);
+  if(filter==='open') list=list.filter(t=>!isTaskDone(t));
+  if(filter==='done') list=list.filter(t=>isTaskDone(t));
+  if(filter==='overdue') list=list.filter(t=>taskUrgency(t)==='overdue');
+  if(filter==='duesoon') list=list.filter(t=>taskUrgency(t)==='duesoon');
+
+  if(filter==='done'){
+    list=[...list].sort((a,b)=>{
+      const da=effectiveDueDate(a),db=effectiveDueDate(b);
+      return(da?da.getTime():Infinity)-(db?db.getTime():Infinity);
+    });
+  } else {
+    list=[...list].sort((a,b)=>{
+      if(filter==='all'){
+        const catDiff=(isTaskDone(a)?1:0)-(isTaskDone(b)?1:0);
+        if(catDiff!==0) return catDiff;
+      }
+      const ownerA=(a['Owner']||'').toLowerCase(),ownerB=(b['Owner']||'').toLowerCase();
+      if(ownerA!==ownerB) return ownerA<ownerB?-1:1;
+      const da=effectiveDueDate(a),db=effectiveDueDate(b);
+      return(da?da.getTime():Infinity)-(db?db.getTime():Infinity);
+    });
+  }
+
   const rows=list.map(t=>[t['Task'],t['Related Contact']||'—',t['Owner'],t['Due Date']?fmtDate(parseDate(t['Due Date'])):'—',t['Revised Due Date']?fmtDate(parseDate(t['Revised Due Date'])):'—',taskStatusPill(t)]);
   const el=document.getElementById('tasksResults');
   if(el) el.innerHTML=renderTable(['Task','Related Contact','Owner','Due Date','Revised Due Date','Status'],rows,{emptyText:'No tasks in this filter.'});
@@ -992,10 +1043,14 @@ function buildLeadProfileHTML(name){
   const rows=interactions.map(i=>[fmtDate(parseDate(i['Date'])),i['Notes']||'']);
   return renderTable(['Date','Notes'],rows,{emptyText:'No interactions logged yet.'});
 }
+function isLeadClosed(l){
+  const s=(l['Status']||'').toLowerCase();
+  return s.includes('convert')||s.includes('not interested');
+}
 function renderLeadsTab(){
   const leads=DATA.leads||[];
-  const leadCount=leads.filter(l=>(l['Type']||'').toLowerCase().includes('lead')).length;
-  const referrerCount=leads.filter(l=>(l['Type']||'').toLowerCase().includes('referrer')).length;
+  const leadCount=leads.filter(l=>(l['Type']||'').toLowerCase().includes('lead')&&!isLeadClosed(l)).length;
+  const referrerCount=leads.filter(l=>(l['Type']||'').toLowerCase().includes('referrer')&&!isLeadClosed(l)).length;
 
   const kpis=kpiRow(
     kpiCard('Total Leads',leadCount),
@@ -1016,6 +1071,7 @@ function filterLeadsTable(filter){
   let list=DATA.leads||[];
   if(filter==='lead') list=list.filter(l=>(l['Type']||'').toLowerCase().includes('lead'));
   if(filter==='referrer') list=list.filter(l=>(l['Type']||'').toLowerCase().includes('referrer'));
+  list=[...list].sort((a,b)=>(isLeadClosed(a)?1:0)-(isLeadClosed(b)?1:0));
 
   const headers=['Name','Type','Status','Tasks','Last Contact',''];
   const thead='<tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr>';
