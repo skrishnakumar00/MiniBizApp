@@ -1035,13 +1035,22 @@ function computeLastContact(leadName){
   return lastDate;
 }
 function buildLeadProfileHTML(name){
+  const leadTasks=(DATA.tasks||[]).filter(t=>(t['Related Contact']||'').toLowerCase()===name.toLowerCase()&&!isTaskDone(t));
+  const taskRows=leadTasks.map(t=>[t['Task'],t['Owner'],t['Due Date']?fmtDate(parseDate(t['Due Date'])):'—',t['Revised Due Date']?fmtDate(parseDate(t['Revised Due Date'])):'—',taskStatusPill(t)]);
+  const taskTable=renderTable(['Task','Owner','Due Date','Revised Due Date','Status'],taskRows,{emptyText:'No pending tasks for this lead.'});
+
   let interactions=(DATA.leadInteractions||[]).filter(i=>(i['Lead Name']||'').toLowerCase()===name.toLowerCase());
   interactions.sort((a,b)=>{
     const da=parseDate(a['Date']),db=parseDate(b['Date']);
     return(db?db.getTime():0)-(da?da.getTime():0);
   });
   const rows=interactions.map(i=>[fmtDate(parseDate(i['Date'])),i['Notes']||'']);
-  return renderTable(['Date','Notes'],rows,{emptyText:'No interactions logged yet.'});
+  const interactionTable=renderTable(['Date','Notes'],rows,{emptyText:'No interactions logged yet.'});
+
+  return `
+    <div class="profile-section"><div class="profile-section-title">✅ Pending Tasks</div>${taskTable}</div>
+    <div class="profile-section"><div class="profile-section-title">💬 Interaction Timeline</div>${interactionTable}</div>
+  `;
 }
 function isLeadClosed(l){
   const s=(l['Status']||'').toLowerCase();
