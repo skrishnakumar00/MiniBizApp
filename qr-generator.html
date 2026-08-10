@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>QR code maker — Mini's Homely Masalas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FBF6EC; --bg-alt:#F4E9D3; --paper:#FFFDF8;
+    --ink:#2B1B12; --ink-soft:#6B5847;
+    --brand-dark:#241811; --brand-orange:#D98F3E;
+    --line: rgba(43,27,18,.14);
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:'Work Sans', -apple-system, sans-serif;
+    min-height:100vh;
+  }
+  .topband{ background:var(--brand-dark); color:#FBF2E4; padding:18px 20px; }
+  .topband h1{
+    max-width:640px; margin:0 auto; font-family:'Fraunces', serif;
+    font-weight:600; font-size:19px;
+  }
+  .wrap{ max-width:640px; margin:0 auto; padding:24px 20px 64px; display:grid; gap:24px; }
+
+  label{ display:block; font-size:12.5px; font-weight:600; color:var(--ink-soft); margin-bottom:5px; }
+  input[type=text], input[type=url]{
+    width:100%; font-size:15px; font-family:inherit;
+    padding:10px 12px; border:1px solid var(--line); border-radius:10px;
+    background:var(--paper); color:var(--ink);
+  }
+  .field{ margin-bottom:14px; }
+  .field-row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .swatch-row{ display:flex; gap:8px; align-items:center; }
+  input[type=color]{ width:34px; height:34px; border:1px solid var(--line); border-radius:8px; padding:2px; background:var(--paper); }
+
+  .card{
+    background:var(--paper); border:1px solid var(--line); border-radius:16px;
+    padding:20px; box-shadow:0 2px 0 rgba(43,27,18,.05), 0 10px 24px -14px rgba(43,27,18,.3);
+  }
+  .card h2{ font-family:'Fraunces', serif; font-weight:500; font-style:italic; font-size:17px; margin:0 0 14px; }
+
+  .preview-shell{ display:flex; justify-content:center; padding:8px 0 4px; }
+  #qrCanvas{ max-width:100%; height:auto; border-radius:12px; }
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    width:100%; padding:13px; border:none; border-radius:10px;
+    background:var(--brand-dark); color:#FBF2E4;
+    font-family:inherit; font-size:14.5px; font-weight:600;
+    cursor:pointer; margin-top:16px;
+  }
+  .btn:active{ opacity:.85; }
+  .hint{ font-size:12.5px; color:var(--ink-soft); margin-top:8px; line-height:1.5; }
+</style>
+</head>
+<body>
+
+<div class="topband"><h1>QR code maker</h1></div>
+
+<div class="wrap">
+
+  <div class="card">
+    <h2>What it should say and look like</h2>
+
+    <div class="field">
+      <label for="url">Link (where the QR code sends people)</label>
+      <input type="url" id="url" value="https://skrishnakumar00.github.io/MiniBizApp/" />
+    </div>
+
+    <div class="field">
+      <label for="header">Header text (shown above the code)</label>
+      <input type="text" id="header" value="Mini's Homely Masalas" />
+    </div>
+
+    <div class="field">
+      <label for="footer">Footer text (shown below the code)</label>
+      <input type="text" id="footer" value="Scan for preparation instructions & recipe videos" />
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>Code color</label>
+        <div class="swatch-row">
+          <input type="color" id="fgColor" value="#241811" />
+          <span class="hint" id="fgHex">#241811</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Background</label>
+        <div class="swatch-row">
+          <input type="color" id="bgColor" value="#fbf6ec" />
+          <span class="hint" id="bgHex">#fbf6ec</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Preview</h2>
+    <div class="preview-shell">
+      <canvas id="qrCanvas"></canvas>
+    </div>
+    <button class="btn" id="downloadBtn">Download as PNG</button>
+    <p class="hint">Downloads at print resolution. Test the link by scanning the on-screen preview with your phone before you print.</p>
+  </div>
+
+</div>
+
+<script>
+// Try loading the QR library from two different CDNs in turn, in case
+// one is blocked by a network filter, ad blocker, or local security policy.
+const QR_SOURCES = [
+  "https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"
+];
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = () => reject(new Error("failed: " + src));
+    document.head.appendChild(s);
+  });
+}
+async function ensureQRLibrary() {
+  if (typeof QRCode !== "undefined") return true;
+  for (const src of QR_SOURCES) {
+    try {
+      await loadScript(src);
+      if (typeof QRCode !== "undefined") return true;
+    } catch (e) { /* try next source */ }
+  }
+  return false;
+}
+</script>
+<script>
+const urlInput = document.getElementById("url");
+const headerInput = document.getElementById("header");
+const footerInput = document.getElementById("footer");
+const fgColor = document.getElementById("fgColor");
+const bgColor = document.getElementById("bgColor");
+const fgHex = document.getElementById("fgHex");
+const bgHex = document.getElementById("bgHex");
+const canvas = document.getElementById("qrCanvas");
+const ctx = canvas.getContext("2d");
+
+const SCALE = 2; // export resolution multiplier for crisp printing
+const DESIGN_W = 640;
+const QR_SIZE = 380;
+const PAD = 40;
+
+function wrapText(context, text, maxWidth) {
+  const words = text.split(" ");
+  const lines = [];
+  let line = "";
+  for (const word of words) {
+    const test = line ? line + " " + word : word;
+    if (context.measureText(test).width > maxWidth && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = test;
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
+async function render() {
+  const url = urlInput.value.trim() || "https://example.com";
+  const headerText = headerInput.value.trim();
+  const footerText = footerInput.value.trim();
+  const fg = fgColor.value;
+  const bg = bgColor.value;
+
+  // Measure header/footer heights first (wrapped) so canvas height is exact.
+  const measureCtx = document.createElement("canvas").getContext("2d");
+  measureCtx.font = "600 26px Fraunces, serif";
+  const headerLines = headerText ? wrapText(measureCtx, headerText, DESIGN_W - PAD * 2) : [];
+  measureCtx.font = "500 16px 'Work Sans', sans-serif";
+  const footerLines = footerText ? wrapText(measureCtx, footerText, DESIGN_W - PAD * 2) : [];
+
+  const headerH = headerLines.length ? headerLines.length * 34 + 26 : 10;
+  const footerH = footerLines.length ? footerLines.length * 24 + 30 : 10;
+  const designH = headerH + QR_SIZE + footerH + PAD;
+
+  canvas.width = DESIGN_W * SCALE;
+  canvas.height = designH * SCALE;
+  canvas.style.width = DESIGN_W + "px";
+  canvas.style.height = designH + "px";
+  ctx.setTransform(SCALE, 0, 0, SCALE, 0, 0);
+
+  // Background
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, DESIGN_W, designH);
+
+  let y = 30;
+
+  // Header
+  if (headerLines.length) {
+    ctx.fillStyle = fg;
+    ctx.font = "600 26px Fraunces, serif";
+    ctx.textAlign = "center";
+    for (const line of headerLines) {
+      y += 30;
+      ctx.fillText(line, DESIGN_W / 2, y);
+    }
+    y += 20;
+  } else {
+    y += headerH;
+  }
+
+  // QR code, rendered at native SCALE resolution then drawn using
+  // UNSCALED coordinates — the canvas transform above already applies
+  // the SCALE factor, so multiplying again here pushed it off-canvas.
+  const qrCanvas = document.createElement("canvas");
+  try {
+    const ready = await ensureQRLibrary();
+    if (!ready) {
+      throw new Error("Couldn't reach the QR library. Check your internet connection, or try disabling any ad blocker for this page.");
+    }
+    await QRCode.toCanvas(qrCanvas, url, {
+      width: QR_SIZE * SCALE,
+      margin: 1,
+      color: { dark: fg, light: bg },
+      errorCorrectionLevel: "M"
+    });
+    const qrX = (DESIGN_W - QR_SIZE) / 2;
+    ctx.drawImage(qrCanvas, qrX, y, QR_SIZE, QR_SIZE);
+    y += QR_SIZE + 30;
+  } catch (err) {
+    ctx.fillStyle = "#A6320B";
+    ctx.font = "500 13px 'Work Sans', sans-serif";
+    ctx.textAlign = "center";
+    const errLines = wrapText(ctx, err.message, DESIGN_W - PAD * 2);
+    for (const line of errLines) { y += 20; ctx.fillText(line, DESIGN_W / 2, y); }
+    y += 40;
+  }
+
+  // Footer
+  if (footerLines.length) {
+    ctx.fillStyle = fg;
+    ctx.font = "italic 500 16px Fraunces, serif";
+    ctx.textAlign = "center";
+    for (const line of footerLines) {
+      y += 24;
+      ctx.fillText(line, DESIGN_W / 2, y);
+    }
+  }
+}
+
+function syncHexLabel() {
+  fgHex.textContent = fgColor.value;
+  bgHex.textContent = bgColor.value;
+}
+
+[urlInput, headerInput, footerInput, fgColor, bgColor].forEach(el => {
+  el.addEventListener("input", () => { syncHexLabel(); render(); });
+  el.addEventListener("change", () => { syncHexLabel(); render(); });
+});
+
+document.getElementById("downloadBtn").addEventListener("click", () => {
+  const link = document.createElement("a");
+  const name = (headerInput.value.trim() || "qr-code").toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  link.download = `${name}-qr.png`;
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+});
+
+document.fonts.ready.then(() => { syncHexLabel(); render(); });
+render();
+</script>
+</body>
+</html>
