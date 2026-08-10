@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mini's Homely Masalas — How to use</title>
+<meta name="description" content="Preparation instructions for Mini's Homely Masalas products." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #FBF6EC;
+    --bg-alt: #F4E9D3;
+    --paper: #FFFDF8;
+    --ink: #2B1B12;
+    --ink-soft: #6B5847;
+    --chili: #A6320B;
+    --chili-deep: #7C2408;
+    --turmeric: #D9A404;
+    --cardamom: #57724F;
+    --line: rgba(43,27,18,.14);
+    --shadow: 0 2px 0 rgba(43,27,18,.06), 0 10px 24px -14px rgba(43,27,18,.35);
+    --radius: 18px;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 90% -10%, var(--bg-alt), transparent 60%),
+      var(--bg);
+    color:var(--ink);
+    font-family:'Work Sans', -apple-system, sans-serif;
+    line-height:1.5;
+    min-height:100vh;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:.01ms !important; transition-duration:.01ms !important; }
+  }
+
+  a{ color:inherit; }
+
+  .wrap{ max-width:640px; margin:0 auto; padding:0 20px 64px; }
+
+  /* ---------- header ---------- */
+  .topband{
+    background:var(--chili);
+    background-image: radial-gradient(circle at 12% 30%, rgba(255,255,255,.10) 0, transparent 40%),
+                       radial-gradient(circle at 85% 70%, rgba(255,255,255,.08) 0, transparent 45%);
+    color:#FBF2E4;
+    padding:22px 20px 30px;
+  }
+  .brandrow{
+    max-width:640px; margin:0 auto;
+    display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+  }
+  .brand{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:20px;
+    letter-spacing:.01em;
+  }
+  .brand em{ font-style:italic; font-weight:500; color:var(--turmeric); }
+  .homelink{
+    font-size:12.5px;
+    color:#F3D9AE;
+    text-decoration:none;
+    border-bottom:1px solid rgba(243,217,174,.4);
+    padding-bottom:1px;
+    white-space:nowrap;
+  }
+
+  /* ---------- masthead / eyebrow ---------- */
+  .eyebrow{
+    font-size:12px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin:26px 0 6px;
+  }
+
+  /* ---------- SELECTOR VIEW ---------- */
+  .intro{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-style:italic;
+    font-size:26px;
+    line-height:1.3;
+    margin:0 0 4px;
+  }
+  .intro-sub{
+    color:var(--ink-soft);
+    font-size:14.5px;
+    margin:0 0 22px;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+  @media (min-width:480px){ .grid{ grid-template-columns:1fr 1fr 1fr; } }
+
+  .card{
+    display:block;
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:16px;
+    overflow:hidden;
+    text-decoration:none;
+    color:var(--ink);
+    box-shadow:var(--shadow);
+    transition:transform .15s ease;
+  }
+  .card:active{ transform:scale(.98); }
+  .card-img{
+    aspect-ratio:1/1;
+    background:var(--bg-alt);
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
+  .card-img img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .card-img .fallback-icon{ opacity:.35; }
+  .card-body{ padding:10px 12px 14px; }
+  .card-cat{
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--cardamom);
+    font-weight:600;
+  }
+  .card-name{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:15.5px;
+    margin-top:2px;
+    line-height:1.25;
+  }
+
+  /* ---------- DETAIL VIEW ---------- */
+  .back{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:13px; color:var(--ink-soft);
+    text-decoration:none;
+    margin:22px 0 14px;
+  }
+  .back svg{ width:14px; height:14px; }
+
+  .hero{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    overflow:hidden;
+    margin-bottom:22px;
+  }
+  .hero-img{
+    width:100%; aspect-ratio:4/3;
+    background:var(--bg-alt);
+    object-fit:cover; display:block;
+  }
+  .hero-body{ padding:20px 20px 22px; }
+  .hero-cat{
+    display:inline-block;
+    font-size:11px; font-weight:600;
+    letter-spacing:.08em; text-transform:uppercase;
+    color:var(--cardamom);
+    background:rgba(87,114,79,.1);
+    padding:3px 9px;
+    border-radius:100px;
+  }
+  .hero-name{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:30px;
+    line-height:1.15;
+    margin:10px 0 4px;
+  }
+  .hero-tagline{ color:var(--ink-soft); font-size:15px; margin:0; }
+
+  /* signature element: the ratio badge, styled like a measuring spoon tag */
+  .ratio-badge{
+    margin-top:16px;
+    display:flex; align-items:center; gap:10px;
+    background:var(--chili);
+    color:#FBF2E4;
+    border-radius:12px;
+    padding:11px 14px;
+  }
+  .ratio-badge svg{ width:22px; height:22px; flex:none; }
+  .ratio-badge .rb-label{
+    font-size:10px; text-transform:uppercase; letter-spacing:.09em;
+    color:#F0C68A; margin-bottom:1px;
+  }
+  .ratio-badge .rb-value{
+    font-family:'Fraunces', serif; font-weight:600; font-size:16px;
+  }
+
+  .section{ margin-bottom:26px; }
+  .section-title{
+    font-family:'Fraunces', serif;
+    font-style:italic; font-weight:500;
+    font-size:19px;
+    margin:0 0 12px;
+  }
+
+  .chips{ display:flex; flex-wrap:wrap; gap:8px; }
+  .chip{
+    font-size:13px;
+    background:var(--bg-alt);
+    border:1px solid var(--line);
+    padding:6px 12px;
+    border-radius:100px;
+    color:var(--ink);
+  }
+
+  .steps{ list-style:none; margin:0; padding:0; counter-reset:step; }
+  .steps li{
+    counter-increment:step;
+    display:flex; gap:14px;
+    padding:14px 0;
+    border-top:1px solid var(--line);
+  }
+  .steps li:first-child{ border-top:none; }
+  .steps li::before{
+    content:counter(step);
+    font-family:'Fraunces', serif; font-weight:600;
+    color:var(--chili);
+    font-size:15px;
+    flex:none;
+    width:28px; height:28px;
+    border:1.5px solid var(--chili);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .step-text{ padding-top:3px; font-size:15px; }
+
+  .video-frame{
+    position:relative; width:100%;
+    aspect-ratio:16/9;
+    border-radius:14px;
+    overflow:hidden;
+    background:var(--ink);
+    border:1px solid var(--line);
+  }
+  .video-frame iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+
+  .notes{
+    background:var(--bg-alt);
+    border-radius:14px;
+    padding:16px 18px;
+    font-size:14.5px;
+    color:var(--ink-soft);
+    display:flex; gap:10px;
+  }
+  .notes svg{ flex:none; width:18px; height:18px; margin-top:1px; color:var(--turmeric); }
+
+  .footer-cta{
+    text-align:center;
+    padding-top:8px;
+  }
+  .footer-cta a{
+    text-decoration:none;
+    font-size:13.5px;
+    color:var(--chili-deep);
+    border-bottom:1px solid var(--line);
+  }
+
+  .state-msg{
+    text-align:center;
+    padding:60px 20px;
+    color:var(--ink-soft);
+    font-size:14.5px;
+  }
+</style>
+</head>
+<body>
+
+<div class="topband">
+  <div class="brandrow">
+    <div class="brand">Mini's <em>Homely</em> Masalas</div>
+    <a class="homelink" href="?" id="homelink">All products</a>
+  </div>
+</div>
+
+<div class="wrap" id="app">
+  <div class="state-msg">Loading…</div>
+</div>
+
+<script>
+/* =========================================================
+   CONFIG — replace with your own published Google Sheet
+   ========================================================= */
+const SHEET_ID = "1g_3IvU7ubB_7lGB2W5sdgOQSxvpPgvfKEuK9znadnsQ";
+const GID = "0"; // the tab's gid, visible in the sheet URL after #gid=
+const IMAGE_BASE = "images/"; // folder in this same repo where product images live
+
+/* Demo data used automatically if SHEET_ID isn't set,
+   so you can see the page working right away. */
+const DEMO_DATA = [
+  {
+    id: "garam-masala",
+    name: "Garam Masala",
+    category: "Masala",
+    tagline: "Warm whole-spice blend, roasted and ground fresh",
+    ratio: "1 tsp per serving",
+    ingredients_needed: "Oil, onion, tomato",
+    steps: "Heat 1 tbsp oil in a pan on medium flame|Add chopped onions and sauté till golden|Stir in Mini's Garam Masala (1 tsp) and cook for 30 seconds till fragrant|Add tomatoes and your main ingredient, cook covered for 10–12 minutes|Finish with a pinch of masala on top before serving",
+    video_id: "",
+    image: "",
+    notes: "Store in an airtight jar away from sunlight. Best used within 4 months of opening."
+  },
+  {
+    id: "rasam-mix",
+    name: "Rasam Ready Mix",
+    category: "Ready Mix",
+    tagline: "South-Indian tangy soul food, ready in 10 minutes",
+    ratio: "2 tbsp per 2 cups water",
+    ingredients_needed: "Water, tomato, tamarind (optional), coriander leaves",
+    steps: "Boil 2 cups water with 1 chopped tomato|Add 2 tbsp Rasam Mix and stir well|Simmer on low flame for 5–6 minutes|Add a small piece of tamarind if you like it tangier|Garnish with coriander leaves and serve hot with rice",
+    video_id: "",
+    image: "",
+    notes: "For a thinner rasam, add an extra ½ cup water. Shake the pack well before each use."
+  },
+  {
+    id: "rose-sherbet",
+    name: "Rose Sherbet",
+    category: "Sherbet",
+    tagline: "Fragrant rose concentrate, straight from the family recipe",
+    ratio: "3 tbsp per glass of water",
+    ingredients_needed: "Chilled water or milk, ice",
+    steps: "Take a tall glass and add 3 tbsp Rose Sherbet syrup|Pour in chilled water or milk (200 ml)|Add ice cubes|Stir well until fully mixed and serve immediately",
+    video_id: "",
+    image: "",
+    notes: "Shake the bottle before use — natural settling is normal. Refrigerate after opening, use within 3 weeks."
+  }
+];
+
+/* =========================================================
+   Data loading
+   ========================================================= */
+async function loadProducts() {
+  if (!SHEET_ID || SHEET_ID.startsWith("PASTE_")) {
+    return DEMO_DATA;
+  }
+  // Direct CSV export — sheet just needs "Anyone with the link: Viewer" sharing.
+  // No separate "Publish to web" step required.
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Sheet fetch failed: ${res.status}`);
+  const text = await res.text();
+  return parseCSV(text);
+}
+
+/* Small CSV parser that handles quoted fields containing commas,
+   newlines, and escaped quotes ("") — needed since columns like
+   "ingredients_needed" and "notes" may contain commas. */
+function parseCSV(text) {
+  const rows = [];
+  let row = [], field = "", inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i], next = text[i + 1];
+    if (inQuotes) {
+      if (c === '"' && next === '"') { field += '"'; i++; }
+      else if (c === '"') { inQuotes = false; }
+      else { field += c; }
+    } else {
+      if (c === '"') { inQuotes = true; }
+      else if (c === ',') { row.push(field); field = ""; }
+      else if (c === '\r') { /* skip */ }
+      else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ""; }
+      else { field += c; }
+    }
+  }
+  if (field.length || row.length) { row.push(field); rows.push(row); }
+
+  const headers = rows.shift().map(h => h.toLowerCase().trim());
+  return rows
+    .filter(r => r.some(cell => cell.trim() !== ""))
+    .map(r => {
+      const obj = {};
+      headers.forEach((h, i) => { obj[h] = (r[i] || "").trim(); });
+      return obj;
+    });
+}
+
+/* =========================================================
+   Rendering
+   ========================================================= */
+const app = document.getElementById("app");
+
+function iconLeaf(){
+  return `<svg viewBox="0 0 24 24" fill="none"><path d="M12 21c-4-1-7-4-7-9 0-5 3-8 7-9 4 1 7 4 7 9 0 5-3 8-7 9Z" stroke="currentColor" stroke-width="1.4"/><path d="M12 3v18" stroke="currentColor" stroke-width="1.4"/></svg>`;
+}
+function iconSpoon(){
+  return `<svg viewBox="0 0 24 24" fill="none"><ellipse cx="9" cy="7" rx="4.2" ry="5" stroke="currentColor" stroke-width="1.5"/><path d="M11.8 11.2 19 18.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+}
+function iconBack(){
+  return `<svg viewBox="0 0 24 24" fill="none"><path d="M15 5 8 12l7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+function iconInfo(){
+  return `<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.4"/><path d="M12 11v5.5M12 8v.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+}
+
+function imgTag(filename, alt, cls){
+  if (!filename) {
+    return `<div class="${cls}" style="display:flex;align-items:center;justify-content:center;color:var(--ink-soft);">${iconLeafBig()}</div>`;
+  }
+  return `<img class="${cls}" src="${IMAGE_BASE}${filename}" alt="${alt}" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'${cls}',style:'display:flex;align-items:center;justify-content:center;color:var(--ink-soft)',innerHTML:iconLeafBig()}))">`;
+}
+function iconLeafBig(){
+  return `<svg viewBox="0 0 24 24" fill="none" style="width:34px;height:34px;opacity:.4"><path d="M12 21c-4-1-7-4-7-9 0-5 3-8 7-9 4 1 7 4 7 9 0 5-3 8-7 9Z" stroke="currentColor" stroke-width="1.4"/><path d="M12 3v18" stroke="currentColor" stroke-width="1.4"/></svg>`;
+}
+
+function renderSelector(products) {
+  document.getElementById("homelink").style.display = "none";
+  const cards = products.map(p => `
+    <a class="card" href="?product=${encodeURIComponent(p.id)}">
+      <div class="card-img">${imgTag(p.image, p.name, "")}</div>
+      <div class="card-body">
+        <div class="card-cat">${p.category || ""}</div>
+        <div class="card-name">${p.name}</div>
+      </div>
+    </a>
+  `).join("");
+
+  app.innerHTML = `
+    <div class="eyebrow">How to use</div>
+    <p class="intro">Pick your pack, and we'll show you<br/>exactly how to make it.</p>
+    <p class="intro-sub">Instructions, ratios and videos for everything Mini's makes.</p>
+    <div class="grid">${cards}</div>
+  `;
+}
+
+function renderDetail(p) {
+  document.getElementById("homelink").style.display = "inline";
+
+  const ingredients = (p.ingredients_needed || "")
+    .split(",").map(s => s.trim()).filter(Boolean)
+    .map(i => `<span class="chip">${i}</span>`).join("");
+
+  const steps = (p.steps || "")
+    .split("|").map(s => s.trim()).filter(Boolean)
+    .map(s => `<li><span class="step-text">${s}</span></li>`).join("");
+
+  const videoSection = p.video_id ? `
+    <div class="section">
+      <h2 class="section-title">Watch how it's made</h2>
+      <div class="video-frame">
+        <iframe src="https://www.youtube.com/embed/${p.video_id}"
+          title="${p.name} preparation video"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen loading="lazy"></iframe>
+      </div>
+    </div>` : "";
+
+  const ingredientsSection = ingredients ? `
+    <div class="section">
+      <h2 class="section-title">You'll also need</h2>
+      <div class="chips">${ingredients}</div>
+    </div>` : "";
+
+  const notesSection = p.notes ? `
+    <div class="section">
+      <div class="notes">${iconInfo()}<span>${p.notes}</span></div>
+    </div>` : "";
+
+  app.innerHTML = `
+    <a class="back" href="?">${iconBack()} All products</a>
+    <div class="hero">
+      ${imgTag(p.image, p.name, "hero-img")}
+      <div class="hero-body">
+        <span class="hero-cat">${p.category || ""}</span>
+        <h1 class="hero-name">${p.name}</h1>
+        <p class="hero-tagline">${p.tagline || ""}</p>
+        ${p.ratio ? `
+        <div class="ratio-badge">
+          ${iconSpoon()}
+          <div>
+            <div class="rb-label">Mix ratio</div>
+            <div class="rb-value">${p.ratio}</div>
+          </div>
+        </div>` : ""}
+      </div>
+    </div>
+
+    ${ingredientsSection}
+
+    <div class="section">
+      <h2 class="section-title">How to prepare</h2>
+      <ul class="steps">${steps}</ul>
+    </div>
+
+    ${videoSection}
+    ${notesSection}
+
+    <div class="footer-cta">
+      <a href="?">${iconLeaf()} See all Mini's products</a>
+    </div>
+  `;
+}
+
+function renderNotFound(id) {
+  document.getElementById("homelink").style.display = "inline";
+  app.innerHTML = `
+    <div class="state-msg">
+      We couldn't find instructions for "<strong>${id}</strong>".<br/><br/>
+      <a href="?">Browse all products →</a>
+    </div>
+  `;
+}
+
+/* =========================================================
+   Router
+   ========================================================= */
+(async function init() {
+  let products = [];
+  try {
+    products = await loadProducts();
+  } catch (e) {
+    app.innerHTML = `<div class="state-msg">Couldn't load product info right now.<br/>Please check your connection and try again.</div>`;
+    console.error(e);
+    return;
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const productId = params.get("product");
+
+  if (!productId) {
+    renderSelector(products);
+    return;
+  }
+  const product = products.find(p => p.id === productId);
+  if (!product) {
+    renderNotFound(productId);
+    return;
+  }
+  renderDetail(product);
+})();
+</script>
+</body>
+</html>
