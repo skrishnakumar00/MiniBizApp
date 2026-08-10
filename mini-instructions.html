@@ -15,9 +15,11 @@
     --paper: #FFFDF8;
     --ink: #2B1B12;
     --ink-soft: #6B5847;
+    --brand-dark: #241811;
+    --brand-orange: #D98F3E;
     --chili: #A6320B;
     --chili-deep: #7C2408;
-    --turmeric: #D9A404;
+    --turmeric: #D98F3E;
     --cardamom: #57724F;
     --line: rgba(43,27,18,.14);
     --shadow: 0 2px 0 rgba(43,27,18,.06), 0 10px 24px -14px rgba(43,27,18,.35);
@@ -46,15 +48,21 @@
 
   /* ---------- header ---------- */
   .topband{
-    background:var(--chili);
-    background-image: radial-gradient(circle at 12% 30%, rgba(255,255,255,.10) 0, transparent 40%),
-                       radial-gradient(circle at 85% 70%, rgba(255,255,255,.08) 0, transparent 45%);
+    background:var(--brand-dark);
+    background-image: radial-gradient(circle at 12% 30%, rgba(255,255,255,.05) 0, transparent 40%),
+                       radial-gradient(circle at 85% 70%, rgba(255,255,255,.04) 0, transparent 45%);
     color:#FBF2E4;
-    padding:22px 20px 30px;
+    padding:18px 20px 30px;
   }
   .brandrow{
     max-width:640px; margin:0 auto;
-    display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+  }
+  .brand-group{ display:flex; align-items:center; gap:10px; }
+  .brand-logo{
+    width:34px; height:34px; border-radius:50%;
+    object-fit:cover; flex:none;
+    border:1.5px solid rgba(255,255,255,.2);
   }
   .brand{
     font-family:'Fraunces', serif;
@@ -183,18 +191,19 @@
   .ratio-badge{
     margin-top:16px;
     display:flex; align-items:center; gap:10px;
-    background:var(--chili);
+    background:var(--brand-dark);
     color:#FBF2E4;
     border-radius:12px;
     padding:11px 14px;
   }
-  .ratio-badge svg{ width:22px; height:22px; flex:none; }
+  .ratio-badge svg{ width:22px; height:22px; flex:none; color:var(--brand-orange); }
   .ratio-badge .rb-label{
     font-size:10px; text-transform:uppercase; letter-spacing:.09em;
-    color:#F0C68A; margin-bottom:1px;
+    color:#E0B77C; margin-bottom:1px;
   }
   .ratio-badge .rb-value{
     font-family:'Fraunces', serif; font-weight:600; font-size:16px;
+    color:var(--brand-orange);
   }
 
   .section{ margin-bottom:26px; }
@@ -226,11 +235,11 @@
   .steps li::before{
     content:counter(step);
     font-family:'Fraunces', serif; font-weight:600;
-    color:var(--chili);
+    color:var(--brand-orange);
     font-size:15px;
     flex:none;
     width:28px; height:28px;
-    border:1.5px solid var(--chili);
+    border:1.5px solid var(--brand-orange);
     border-radius:50%;
     display:flex; align-items:center; justify-content:center;
   }
@@ -263,7 +272,7 @@
   .footer-cta a{
     text-decoration:none;
     font-size:13.5px;
-    color:var(--chili-deep);
+    color:var(--brand-dark);
     border-bottom:1px solid var(--line);
   }
 
@@ -279,7 +288,10 @@
 
 <div class="topband">
   <div class="brandrow">
-    <div class="brand">Mini's <em>Homely</em> Masalas</div>
+    <div class="brand-group">
+      <img class="brand-logo" src="mini-logo.png" alt="" onerror="this.style.display='none'">
+      <div class="brand">Mini's <em>Homely</em> Masalas</div>
+    </div>
     <a class="homelink" href="?" id="homelink">All products</a>
   </div>
 </div>
@@ -407,7 +419,11 @@ function imgTag(filename, alt, cls){
   if (!filename) {
     return `<div class="${cls}" style="display:flex;align-items:center;justify-content:center;color:var(--ink-soft);">${iconLeafBig()}</div>`;
   }
-  return `<img class="${cls}" src="${IMAGE_BASE}${filename}" alt="${alt}" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'${cls}',style:'display:flex;align-items:center;justify-content:center;color:var(--ink-soft)',innerHTML:iconLeafBig()}))">`;
+  // If the sheet already has a full URL (e.g. raw.githubusercontent.com/...), use it as-is.
+  // Otherwise treat it as a bare filename living in the local images/ folder.
+  const isFullUrl = /^https?:\/\//i.test(filename.trim());
+  const src = isFullUrl ? filename.trim() : `${IMAGE_BASE}${filename}`;
+  return `<img class="${cls}" src="${src}" alt="${alt}" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'${cls}',style:'display:flex;align-items:center;justify-content:center;color:var(--ink-soft)',innerHTML:iconLeafBig()}))">`;
 }
 function iconLeafBig(){
   return `<svg viewBox="0 0 24 24" fill="none" style="width:34px;height:34px;opacity:.4"><path d="M12 21c-4-1-7-4-7-9 0-5 3-8 7-9 4 1 7 4 7 9 0 5-3 8-7 9Z" stroke="currentColor" stroke-width="1.4"/><path d="M12 3v18" stroke="currentColor" stroke-width="1.4"/></svg>`;
@@ -441,7 +457,7 @@ function renderDetail(p) {
     .map(i => `<span class="chip">${i}</span>`).join("");
 
   const steps = (p.steps || "")
-    .split("|").map(s => s.trim()).filter(Boolean)
+    .split(/\||\r?\n/).map(s => s.trim()).filter(Boolean)
     .map(s => `<li><span class="step-text">${s}</span></li>`).join("");
 
   const videoSection = p.video_id ? `
