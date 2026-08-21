@@ -560,7 +560,7 @@ function renderOperations(){
   if(pendingPay.length>0) payHTML+=`<div class="pending-total">Total Pending: ${inr(pendingPayTotal)}</div>`;
 
   return `${kpis}${footnote}
-    <div class="section"><div class="section-title">📞 Loyal Customer Check-ins <span class="badge">${overdueCount+dueCount} need attention</span> <span class="badge badge-muted">${totalCount} total</span></div>${trackerHTML}</div>
+    <div class="section"><div class="section-title">📞 Customer Check-ins <span class="badge">${overdueCount+dueCount} need attention</span> <span class="badge badge-muted">${totalCount} total</span></div>${trackerHTML}</div>
     <div class="section"><div class="section-title">📦 Pending Orders & Payments</div>
       <div class="pending-grid">
         <div><div class="sub-title">🚚 Pending Deliveries (${pendingDel.length})</div>${delivHTML}</div>
