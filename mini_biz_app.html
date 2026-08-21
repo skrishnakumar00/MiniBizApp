@@ -546,7 +546,8 @@ function renderOperations(){
     kpiCard('Target Monthly Revenue',targetRevenue>0?inr(targetRevenue):'—',{sub:targetRevenue>0?`${inr(loyalExpectedRevenue)} (80%) expected from loyal customers`:''}),
     kpiCard('Expected per Loyal Customer',perLoyalCustomer>0?inr(perLoyalCustomer):'—',{sub:`across ${loyalCount} loyal customer${loyalCount===1?'':'s'}`})
   );
-  const footnote=`<div class="interval-note">Target Monthly Revenue = 2× Target Monthly Profit (assumes ~50% margin). Expected per Loyal Customer = 80% of Target Revenue ÷ number of loyal customers.</div>`;
+  const footnote=`<div class="interval-note">Target Monthly Revenue = 2× Target Monthly Profit (assumes ~50% margin). Expected per Loyal Customer = 80% of Target Revenue ÷ number of loyal customers.</div>
+    <div class="interval-note">Leads: Interested in our products &nbsp;·&nbsp; Customers: Trying out, have placed at least one order &nbsp;·&nbsp; Loyal Customers: Have committed a basket or a fixed amount per month</div>`;
 
   const delivRows=pendingDel.map(o=>[`<strong>${o['Customer Name']}</strong>`,o['Product Name'],o['Qty'],fmtDate(parseDate(o['Order Date']))]);
   const delivHTML=renderTable(['Customer','Product','Qty','Order Date'],delivRows,{emptyText:'No pending deliveries.'});
@@ -560,7 +561,7 @@ function renderOperations(){
   if(pendingPay.length>0) payHTML+=`<div class="pending-total">Total Pending: ${inr(pendingPayTotal)}</div>`;
 
   return `${kpis}${footnote}
-    <div class="section"><div class="section-title">📞 Customer Check-ins <span class="badge">${overdueCount+dueCount} need attention</span> <span class="badge badge-muted">${totalCount} total</span></div>${trackerHTML}</div>
+    <div class="section"><div class="section-title">📞 Customers Check-in <span class="badge">${overdueCount+dueCount} need attention</span> <span class="badge badge-muted">${totalCount} total</span></div>${trackerHTML}</div>
     <div class="section"><div class="section-title">📦 Pending Orders & Payments</div>
       <div class="pending-grid">
         <div><div class="sub-title">🚚 Pending Deliveries (${pendingDel.length})</div>${delivHTML}</div>
@@ -1075,12 +1076,30 @@ function renderLeadsTab(){
     <div id="leadsResults"></div>
   </div>`;
 }
+function leadTypeRank(l){
+  const t=(l['Type']||'').toLowerCase();
+  if(t.includes('lead')) return 0;
+  if(t.includes('referrer')) return 1;
+  return 2;
+}
+function leadStatusRank(l){
+  const s=(l['Status']||'').toLowerCase();
+  if(s.includes('new')) return 0;
+  if(s.includes('contact')) return 1;
+  if(s.includes('convert')) return 2;
+  if(s.includes('not interested')) return 3;
+  return 4;
+}
 function filterLeadsTable(filter){
   document.querySelectorAll('#leadFilterPills .filter-pill').forEach(b=>b.classList.toggle('active',b.dataset.filter===filter));
   let list=DATA.leads||[];
   if(filter==='lead') list=list.filter(l=>(l['Type']||'').toLowerCase().includes('lead'));
   if(filter==='referrer') list=list.filter(l=>(l['Type']||'').toLowerCase().includes('referrer'));
-  list=[...list].sort((a,b)=>(isLeadClosed(a)?1:0)-(isLeadClosed(b)?1:0));
+  list=[...list].sort((a,b)=>{
+    const typeDiff=leadTypeRank(a)-leadTypeRank(b);
+    if(typeDiff!==0) return typeDiff;
+    return leadStatusRank(a)-leadStatusRank(b);
+  });
 
   const headers=['Name','Type','Status','Tasks','Last Contact',''];
   const thead='<tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr>';
