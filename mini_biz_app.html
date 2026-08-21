@@ -73,7 +73,7 @@
   tbody tr{border-bottom:1px solid var(--border);}
   tbody tr:last-child{border-bottom:none;}
   tbody tr:hover{background:#FDF8F2;}
-  tbody td{padding:9px 12px;vertical-align:middle;}
+  tbody td{padding:9px 12px;vertical-align:middle;white-space:pre-wrap;}
 
   .pill{display:inline-block;padding:3px 9px;border-radius:20px;font-size:0.66rem;font-weight:600;white-space:nowrap;}
   .pill-green{background:var(--green-light);color:var(--green);}
@@ -671,9 +671,9 @@ function filterCustomersTable(filter){
   let list=DATA.customers;
   if(filter==='loyal') list=list.filter(isLoyalRow);
   if(filter==='others') list=list.filter(c=>!isLoyalRow(c));
-  const rows=list.map(c=>[c['Sr No'],`<strong>${c['Name']}</strong>`,c['Address'],c['City'],c['Phone'],isLoyalRow(c)?pill('Loyal','green'):'—']);
+  const rows=list.map(c=>[c['Sr No'],`<strong>${c['Name']}</strong>`,c['Address'],c['City'],c['Phone'],isLoyalRow(c)?pill('Loyal','green'):'—',c['Notes']||'']);
   const resultsEl=document.getElementById('customersResults');
-  if(resultsEl) resultsEl.innerHTML=renderTable(['Sr No','Name','Address','City','Phone','Loyal'],rows,{emptyText:'No customers in this filter.'});
+  if(resultsEl) resultsEl.innerHTML=renderTable(['Sr No','Name','Address','City','Phone','Loyal','Notes'],rows,{emptyText:'No customers in this filter.'});
 }
 
 /* ===================== TAB: PRODUCTS ===================== */
@@ -1101,7 +1101,7 @@ function filterLeadsTable(filter){
     return leadStatusRank(a)-leadStatusRank(b);
   });
 
-  const headers=['Name','Type','Status','Tasks','Last Contact',''];
+  const headers=['Name','Type','Status','Tasks','Last Contact','Notes',''];
   const thead='<tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr>';
   const bodyRows=list.map(l=>{
     const idx=historyIdCounter++;
@@ -1114,9 +1114,10 @@ function filterLeadsTable(filter){
       <td data-label="Status">${l['Status']||'—'}</td>
       <td data-label="Tasks">${tasksDisplay}</td>
       <td data-label="Last Contact">${lastContact?fmtDate(lastContact):'—'}</td>
+      <td data-label="Notes">${l['Notes']||''}</td>
       <td data-label="" class="no-label"><a class="view-history-link" id="hist-link-${idx}" data-label="View Profile" onclick="toggleHistory(${idx})">View Profile</a></td>
     </tr>`;
-    const detailRow=`<tr class="history-row" id="hist-${idx}"><td colspan="6" class="history-cell">${buildLeadProfileHTML(l['Name'])}</td></tr>`;
+    const detailRow=`<tr class="history-row" id="hist-${idx}"><td colspan="7" class="history-cell">${buildLeadProfileHTML(l['Name'])}</td></tr>`;
     return mainRow+detailRow;
   }).join('');
 
