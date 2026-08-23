@@ -799,8 +799,57 @@ async function generateMenuPDF(){
     doc.text('No products available to show.',marginX,y);
   }
 
+  const colGutter=8;
+  const colWidth=(pageWidth-marginX*2-colGutter)/2;
+  const col1X=marginX;
+  const col2X=marginX+colWidth+colGutter;
+  const priceReserve=17;
+  const nameMaxWidth=colWidth-priceReserve;
+
+  function drawItem(p,x,startCy){
+    let cy=startCy;
+    const name=p['Name']||'';
+    const qty=[p['Pack Size'],p['Qty']].filter(v=>v&&String(v).trim()).join(' ');
+    const price=p['Price']?('Rs. '+parseFloat(p['Price']).toFixed(0)):'';
+
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(10);
+    const nameLines=doc.splitTextToSize(name,nameMaxWidth);
+    doc.setTextColor(...ink);
+    doc.text(nameLines,x,cy);
+
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(10);
+    doc.setTextColor(...gold);
+    doc.text(price,x+colWidth,cy,{align:'right'});
+
+    cy+=nameLines.length*4.3;
+    if(qty){
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(8);
+      doc.setTextColor(...muted);
+      doc.text(qty,x,cy);
+      cy+=4.5;
+    }
+    cy+=3.5;
+    return cy;
+  }
+  function estimateColumnHeight(items){
+    return items.reduce((h,p)=>{
+      const lines=doc.splitTextToSize(p['Name']||'',nameMaxWidth).length;
+      return h+lines*4.3+4.5+3.5;
+    },0);
+  }
+
   categories.forEach(cat=>{
-    if(y>pageHeight-35){ doc.addPage(); y=24; }
+    const catProducts=byCategory[cat];
+    const half=Math.ceil(catProducts.length/2);
+    const leftItems=catProducts.slice(0,half);
+    const rightItems=catProducts.slice(half);
+    const estimatedHeight=14+Math.max(estimateColumnHeight(leftItems),estimateColumnHeight(rightItems));
+
+    if(y+estimatedHeight>pageHeight-15){ doc.addPage(); y=24; }
+
     doc.setFont('helvetica','bold');
     doc.setFontSize(13);
     doc.setTextColor(...ink);
@@ -809,29 +858,14 @@ async function generateMenuPDF(){
     doc.setDrawColor(...border);
     doc.setLineWidth(0.3);
     doc.line(marginX,y,pageWidth-marginX,y);
-    y+=7;
+    y+=8;
 
-    byCategory[cat].forEach(p=>{
-      if(y>pageHeight-20){ doc.addPage(); y=24; }
-      const name=p['Name']||'';
-      const qty=[p['Pack Size'],p['Qty']].filter(v=>v&&String(v).trim()).join(' ');
-      const price=p['Price']?('Rs. '+parseFloat(p['Price']).toFixed(0)):'';
+    const startY=y;
+    let leftCy=startY, rightCy=startY;
+    leftItems.forEach(p=>{ leftCy=drawItem(p,col1X,leftCy); });
+    rightItems.forEach(p=>{ rightCy=drawItem(p,col2X,rightCy); });
 
-      doc.setFont('helvetica','normal');
-      doc.setFontSize(10.5);
-      doc.setTextColor(...ink);
-      doc.text(name,marginX,y);
-
-      doc.setTextColor(...muted);
-      doc.text(String(qty),pageWidth-marginX-30,y);
-
-      doc.setFont('helvetica','bold');
-      doc.setTextColor(...gold);
-      doc.text(price,pageWidth-marginX,y,{align:'right'});
-
-      y+=7;
-    });
-    y+=6;
+    y=Math.max(leftCy,rightCy)+5;
   });
 
   const dateStr=today.toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
