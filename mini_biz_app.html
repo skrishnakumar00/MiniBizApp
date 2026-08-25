@@ -176,17 +176,7 @@
 
 <script>
 /* ===================== CONFIG ===================== */
-const BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS10Pxvujhj60pRw55jBG9TDmDVzJ2jYF8NpFg0x5zWYteG03IzNQCqnBteN_fB-4r1xeymFNisl7Hu/pub';
-const SHEET_TABS = {
-  customers: BASE + '?gid=0&single=true&output=csv',
-  products:  BASE + '?gid=1428094373&single=true&output=csv',
-  orders:    BASE + '?gid=718714399&single=true&output=csv',
-  settings:  BASE + '?gid=1019938917&single=true&output=csv',
-  basket:    BASE + '?gid=429468414&single=true&output=csv',
-  tasks:     BASE + '?gid=1537440528&single=true&output=csv',
-  leads:     BASE + '?gid=726348890&single=true&output=csv',
-  leadInteractions: BASE + '?gid=1452687738&single=true&output=csv'
-};
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytFvVpUf2WVn9oI-UYiI_jov_JXwvgeuSR8GtqaErAXmNazQBFq0sAU6ora3Rc3y2kFg/exec';
 
 const today = new Date(); today.setHours(0,0,0,0);
 let DATA = {};
@@ -234,50 +224,11 @@ function renderTable(headers, rows, opts={}){
   return `<div class="table-wrap"><table class="responsive-table"><thead>${thead}</thead><tbody>${tbody}</tbody></table></div>`;
 }
 
-async function fetchCSV(rawUrl){
-  const url = rawUrl + '&t=' + Date.now();
-  let text = null;
-  try{
-    const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url));
-    if(r.ok) text = await r.text();
-  }catch(e){}
-  if(!text){
-    try{
-      const r = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(url));
-      if(r.ok){const j=await r.json(); text=j.contents;}
-    }catch(e){}
-  }
-  if(!text) throw new Error('Both proxies failed for: ' + rawUrl);
-  return parseCSV(text);
-}
-function parseCSV(text){
-  const rows=[];
-  let row=[],field='',inQuotes=false;
-  for(let i=0;i<text.length;i++){
-    const ch=text[i];
-    if(inQuotes){
-      if(ch==='"'){
-        if(text[i+1]==='"'){ field+='"'; i++; }
-        else{ inQuotes=false; }
-      } else { field+=ch; }
-    } else {
-      if(ch==='"'){ inQuotes=true; }
-      else if(ch===','){ row.push(field); field=''; }
-      else if(ch==='\r'){ /* skip, \n handles the break */ }
-      else if(ch==='\n'){ row.push(field); field=''; rows.push(row); row=[]; }
-      else{ field+=ch; }
-    }
-  }
-  if(field.length>0||row.length>0){ row.push(field); rows.push(row); }
-
-  const nonEmpty=rows.filter(r=>r.some(c=>c.trim()!==''));
-  if(nonEmpty.length===0) return [];
-  const headers=nonEmpty[0].map(h=>h.trim());
-  return nonEmpty.slice(1).map(cols=>{
-    const obj={};
-    headers.forEach((h,i)=>obj[h]=(cols[i]||'').trim());
-    return obj;
-  });
+async function fetchAllData(){
+  const url=APPS_SCRIPT_URL+'?t='+Date.now();
+  const resp=await fetch(url);
+  if(!resp.ok) throw new Error('Apps Script request failed: HTTP '+resp.status);
+  return await resp.json();
 }
 
 function buildPriceMap(products){
@@ -1179,17 +1130,17 @@ async function init(){
   selectedMonths=new Set();
 
   try{
-    const[customers,products,orders,settings,basket,tasks,leads,leadInteractions]=await Promise.all([
-      fetchCSV(SHEET_TABS.customers),
-      fetchCSV(SHEET_TABS.products),
-      fetchCSV(SHEET_TABS.orders),
-      fetchCSV(SHEET_TABS.settings).catch(()=>[]),
-      fetchCSV(SHEET_TABS.basket).catch(()=>[]),
-      fetchCSV(SHEET_TABS.tasks).catch(()=>[]),
-      fetchCSV(SHEET_TABS.leads).catch(()=>[]),
-      fetchCSV(SHEET_TABS.leadInteractions).catch(()=>[])
-    ]);
-    DATA={customers,products,orders,settings,basket,tasks,leads,leadInteractions};
+    const data=await fetchAllData();
+    DATA={
+      customers: data.customers||[],
+      products: data.products||[],
+      orders: data.orders||[],
+      settings: data.settings||[],
+      basket: data.basket||[],
+      tasks: data.tasks||[],
+      leads: data.leads||[],
+      leadInteractions: data.leadInteractions||[]
+    };
 
     document.getElementById('last-updated').textContent='Last refreshed: '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
 
@@ -1216,7 +1167,7 @@ async function init(){
     filterTasksTable('all');
     filterLeadsTable('all');
   }catch(e){
-    app.innerHTML=`<div class="error-msg">⚠️ Could not load data. Check your internet connection and that the Google Sheet is published to web.<br><small>${e.message}</small></div>`;
+    app.innerHTML=`<div class="error-msg">⚠️ Could not load data. Check your internet connection and that the Apps Script deployment is still active.<br><small>${e.message}</small></div>`;
     document.getElementById('last-updated').textContent='Failed to load';
   }finally{
     btn.disabled=false; btn.textContent='⟳ Refresh';
