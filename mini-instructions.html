@@ -7,7 +7,7 @@
 <meta name="description" content="Preparation instructions for Mini's Homely Masalas products." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Work+Sans:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg: #FBF6EC;
@@ -214,6 +214,36 @@
     margin:0 0 12px;
   }
 
+  /* ===== FEATURE: Hindi steps toggle (steps_hi) — remove this block + HINDI JS block to drop the feature ===== */
+  .steps-head{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    margin-bottom:12px;
+  }
+  .steps-head .section-title{ margin:0; }
+  .section-title.hi{
+    font-family:'Noto Sans Devanagari','Work Sans',sans-serif;
+    font-style:normal; font-weight:600; font-size:18px;
+  }
+  .lang-toggle{
+    display:inline-flex; flex:none;
+    border:1px solid var(--line); border-radius:100px;
+    background:var(--paper); overflow:hidden;
+  }
+  .lang-toggle button{
+    appearance:none; border:0; background:transparent; cursor:pointer;
+    font:500 12.5px 'Work Sans','Noto Sans Devanagari',sans-serif;
+    color:var(--ink-soft);
+    padding:6px 13px;
+  }
+  .lang-toggle button[aria-pressed="true"]{
+    background:var(--brand-dark); color:#FBF2E4;
+  }
+  .steps.hi .step-text{
+    font-family:'Noto Sans Devanagari','Work Sans',sans-serif;
+    line-height:1.65;
+  }
+  /* ===== END FEATURE: Hindi steps toggle CSS ===== */
+
   .chips{ display:flex; flex-wrap:wrap; gap:8px; }
   .chip{
     font-size:13px;
@@ -275,6 +305,8 @@
     color:var(--brand-dark);
     border-bottom:1px solid var(--line);
   }
+  /* FIX: footer leaf icon had no size, so the SVG stretched to full width */
+  .footer-cta svg{ width:14px; height:14px; vertical-align:-2px; margin-right:4px; }
 
   .state-msg{
     text-align:center;
@@ -429,6 +461,35 @@ function iconLeafBig(){
   return `<svg viewBox="0 0 24 24" fill="none" style="width:34px;height:34px;opacity:.4"><path d="M12 21c-4-1-7-4-7-9 0-5 3-8 7-9 4 1 7 4 7 9 0 5-3 8-7 9Z" stroke="currentColor" stroke-width="1.4"/><path d="M12 3v18" stroke="currentColor" stroke-width="1.4"/></svg>`;
 }
 
+/* ===== FEATURE: YouTube link/ID parsing =====
+   Accepts a bare video ID or any common YouTube link
+   (watch?v=, youtu.be/, /embed/, /shorts/). Returns "" if nothing usable. */
+function youtubeId(v){
+  v = (v || "").trim();
+  if (!v) return "";
+  const m = v.match(/(?:youtu\.be\/|[?&]v=|\/embed\/|\/shorts\/)([A-Za-z0-9_-]{6,})/);
+  if (m) return m[1];
+  return /^[A-Za-z0-9_-]{6,}$/.test(v) ? v : "";
+}
+/* ===== END FEATURE: YouTube parsing ===== */
+
+/* ===== FEATURE: HINDI steps toggle (JS) ===== */
+const LANG_KEY = "mini_lang";
+function getLang(){
+  try { return localStorage.getItem(LANG_KEY) === "hi" ? "hi" : "en"; }
+  catch(e){ return "en"; }
+}
+function setLang(l){
+  try { localStorage.setItem(LANG_KEY, l); } catch(e){}
+}
+function splitSteps(s){
+  return (s || "").split(/\||\r?\n/).map(x => x.trim()).filter(Boolean);
+}
+function stepsHtml(list){
+  return list.map(s => `<li><span class="step-text">${s}</span></li>`).join("");
+}
+/* ===== END FEATURE: HINDI steps toggle (JS) ===== */
+
 function renderSelector(products) {
   document.getElementById("homelink").style.display = "none";
   const cards = products.map(p => `
@@ -456,15 +517,17 @@ function renderDetail(p) {
     .split(",").map(s => s.trim()).filter(Boolean)
     .map(i => `<span class="chip">${i}</span>`).join("");
 
-  const steps = (p.steps || "")
-    .split(/\||\r?\n/).map(s => s.trim()).filter(Boolean)
-    .map(s => `<li><span class="step-text">${s}</span></li>`).join("");
+  const stepsEn = splitSteps(p.steps);
+  const stepsHi = splitSteps(p.steps_hi);
+  const hasHi = stepsHi.length > 0;
+  const startLang = hasHi ? getLang() : "en";
 
-  const videoSection = p.video_id ? `
+  const vid = youtubeId(p.video_id);
+  const videoSection = vid ? `
     <div class="section">
       <h2 class="section-title">Watch how it's made</h2>
       <div class="video-frame">
-        <iframe src="https://www.youtube.com/embed/${p.video_id}"
+        <iframe src="https://www.youtube.com/embed/${vid}"
           title="${p.name} preparation video"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowfullscreen loading="lazy"></iframe>
@@ -504,8 +567,15 @@ function renderDetail(p) {
     ${ingredientsSection}
 
     <div class="section">
-      <h2 class="section-title">How to prepare</h2>
-      <ul class="steps">${steps}</ul>
+      <div class="steps-head">
+        <h2 class="section-title" id="steps-title">How to prepare</h2>
+        ${hasHi ? `
+        <div class="lang-toggle" role="group" aria-label="Language">
+          <button type="button" data-lang="en" aria-pressed="true">English</button>
+          <button type="button" data-lang="hi" aria-pressed="false">हिन्दी</button>
+        </div>` : ""}
+      </div>
+      <ul class="steps" id="steps-list">${stepsHtml(stepsEn)}</ul>
     </div>
 
     ${videoSection}
@@ -515,6 +585,27 @@ function renderDetail(p) {
       <a href="?">${iconLeaf()} See all Mini's products</a>
     </div>
   `;
+
+  /* ===== FEATURE: HINDI steps toggle (wiring) ===== */
+  if (hasHi) {
+    const titleEl = document.getElementById("steps-title");
+    const listEl = document.getElementById("steps-list");
+    const btns = app.querySelectorAll(".lang-toggle button");
+    const applyLang = (l) => {
+      const hi = l === "hi";
+      titleEl.textContent = hi ? "कैसे बनाएं" : "How to prepare";
+      titleEl.classList.toggle("hi", hi);
+      listEl.classList.toggle("hi", hi);
+      listEl.innerHTML = stepsHtml(hi ? stepsHi : stepsEn);
+      btns.forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === l)));
+    };
+    btns.forEach(b => b.addEventListener("click", () => {
+      setLang(b.dataset.lang);
+      applyLang(b.dataset.lang);
+    }));
+    applyLang(startLang);
+  }
+  /* ===== END FEATURE: HINDI steps toggle (wiring) ===== */
 }
 
 function renderNotFound(id) {
